@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # © 2015-2017 Eficent
 # - Jordi Ballester Alomar
 # © 2015-2017 Serpent Consulting Services Pvt. Ltd. - Sudhir Arya
@@ -29,7 +28,7 @@ class OperatingUnit(models.Model):
     ]
 
     @api.model
-    def name_search(self, name, args=None, operator='ilike', limit=100):
+    def name_search(self, name='', args=None, operator='ilike', limit=100):
         # Make a search with default criteria
         names1 = super(models.Model, self).name_search(
             name=name, args=args, operator=operator, limit=limit)
