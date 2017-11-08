@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # © 2016-17 Eficent Business and IT Consulting Services S.L.
 # © 2016 Serpent Consulting Services Pvt. Ltd.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html).
@@ -6,7 +5,7 @@
     "name": 'Accounting with Operating Units',
     "summary": "Introduces Operating Unit fields in invoices and "
                "Accounting Entries with clearing account",
-    "version": "10.0.1.0.0",
+    "version": "11.0.1.0.0",
     "author": "Eficent, "
               "Serpent Consulting Services Pvt. Ltd.,"
               "Odoo Community Association (OCA)",
