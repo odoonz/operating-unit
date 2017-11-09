@@ -13,7 +13,5 @@ class AccountCommonReport(models.TransientModel):
 
     def _build_contexts(self, data):
         result = super(AccountCommonReport, self)._build_contexts(data)
-        data2 = {}
-        data2['form'] = self.read(['operating_unit_ids'])[0]
-        result['operating_unit_ids'] = data2['form'].get('operating_unit_ids')
+        result['operating_unit_ids'] = self.read(['operating_unit_ids'])[0]
         return result

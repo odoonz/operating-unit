@@ -12,15 +12,17 @@ class AccountingReport(models.TransientModel):
                                           string='Operating Units',
                                           required=False)
 
+    def _build_contexts(self, data):
+        result = super(AccountingReport, self)._build_contexts(data)
+        result['operating_unit_ids'] = self.read(['operating_unit_ids'])[0]
+        return result
+
     def _build_comparison_context(self, data):
         result = super(AccountingReport, self)._build_comparison_context(data)
-        data2 = {}
-        data2['form'] = self.read(['operating_unit_ids'])[0]
-        result['operating_unit_ids'] = data2['form'].get('operating_unit_ids')
+        result['operating_unit_ids'] = self.read(['operating_unit_ids'])[0]
         return result
 
     def _print_report(self, data):
-        operating_units = ', '.join([ou.name for ou in
-                                     self.operating_unit_ids])
+        operating_units = ', '.join(self.operating_unit_ids.mapped('name'))
         data['form'].update({'operating_units': operating_units})
         return super(AccountingReport, self)._print_report(data)

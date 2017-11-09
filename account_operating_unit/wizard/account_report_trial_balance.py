@@ -14,7 +14,6 @@ class AccountBalanceReport(models.TransientModel):
     )
 
     def _print_report(self, data):
-        operating_units = ', '.join([ou.name for ou in
-                                     self.operating_unit_ids])
+        operating_units = ', '.join(self.operating_unit_ids.mapped('name'))
         data['form'].update({'operating_units': operating_units})
         return super(AccountBalanceReport, self)._print_report(data)
