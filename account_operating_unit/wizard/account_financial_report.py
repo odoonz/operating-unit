@@ -12,21 +12,11 @@ class AccountingReport(models.TransientModel):
                                           string='Operating Units',
                                           required=False)
 
-    def _build_contexts(self, data):
-        result = super(AccountingReport, self)._build_contexts(data)
-        data2 = {}
-        data2['form'] = self.read(['operating_unit_ids'])[0]
-        result['operating_unit_ids'] = 'operating_unit_ids' in data2['form']\
-                                       and data2['form']['operating_unit_ids']\
-                                       or False
-        return result
-
     def _build_comparison_context(self, data):
         result = super(AccountingReport, self)._build_comparison_context(data)
-        data['form'] = self.read(['operating_unit_ids'])[0]
-        result['operating_unit_ids'] = 'operating_unit_ids' in data['form'] \
-                                       and data['form']['operating_unit_ids'] \
-                                       or False
+        data2 = {}
+        data2['form'] = self.read(['operating_unit_ids'])[0]
+        result['operating_unit_ids'] = data2['form'].get('operating_unit_ids')
         return result
 
     def _print_report(self, data):

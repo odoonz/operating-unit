@@ -21,16 +21,15 @@ class AccountPayment(models.Model):
     def _get_counterpart_move_line_vals(self, invoice=False):
         res = super(AccountPayment,
                     self)._get_counterpart_move_line_vals(invoice=invoice)
-        if len(invoice) == 1:
-            res['operating_unit_id'] = invoice.operating_unit_id.id or False
+        if invoice and len(invoice) == 1:
+            res['operating_unit_id'] = invoice.operating_unit_id.id
         else:
-            res['operating_unit_id'] = self.operating_unit_id.id or False
+            res['operating_unit_id'] = self.operating_unit_id.id
         return res
 
     def _get_liquidity_move_line_vals(self, amount):
         res = super(AccountPayment, self)._get_liquidity_move_line_vals(amount)
-        res['operating_unit_id'] = self.journal_id.operating_unit_id.id \
-            or False
+        res['operating_unit_id'] = self.journal_id.operating_unit_id.id
         return res
 
     def _get_dst_liquidity_aml_dict_vals(self):
@@ -51,7 +50,7 @@ class AccountPayment(models.Model):
 
         dst_liquidity_aml_dict.update({
             'operating_unit_id':
-                self.destination_journal_id.operating_unit_id.id or False})
+                self.destination_journal_id.operating_unit_id.id})
         return dst_liquidity_aml_dict
 
     def _get_transfer_debit_aml_dict_vals(self):
@@ -59,12 +58,9 @@ class AccountPayment(models.Model):
             'name': self.name,
             'payment_id': self.id,
             'account_id': self.company_id.transfer_account_id.id,
-            'journal_id': self.destination_journal_id.id
+            'journal_id': self.destination_journal_id.id,
+            'operating_unit_id': self.journal_id.operating_unit_id.id,
         }
-        transfer_debit_aml_dict.update({
-            'operating_unit_id':
-                self.journal_id.operating_unit_id.id or False
-        })
         return transfer_debit_aml_dict
 
     def _create_transfer_entry(self, amount):
@@ -78,7 +74,7 @@ class AccountPayment(models.Model):
             amount, self.currency_id, self.company_id.currency_id)
         amount_currency = self.destination_journal_id.currency_id \
             and self.currency_id.with_context(date=self.payment_date).compute(
-                amount, self.destination_journal_id.currency_id) or 0
+                amount, self.destination_journal_id.currency_id) or 0.0
 
         dst_move = self.env['account.move'].create(
             self._get_move_vals(self.destination_journal_id))

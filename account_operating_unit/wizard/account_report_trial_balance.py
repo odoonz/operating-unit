@@ -11,17 +11,7 @@ class AccountBalanceReport(models.TransientModel):
         'operating.unit', 'account_balance_report_operating_unit_rel',
         'account_id', 'operating_unit_id', string='Operating Units',
         required=False,
-        default=[])
-
-    def _build_contexts(self, data):
-        result = super(AccountBalanceReport, self)._build_contexts(data)
-        data2 = {}
-        data2['form'] = self.read(['operating_unit_ids'])[0]
-        result['operating_unit_ids'] = 'operating_unit_ids' \
-                                       in data2['form'] and \
-                                       data2['form']['operating_unit_ids'] \
-                                       or False
-        return result
+    )
 
     def _print_report(self, data):
         operating_units = ', '.join([ou.name for ou in

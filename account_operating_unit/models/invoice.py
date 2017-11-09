@@ -18,23 +18,17 @@ class AccountInvoice(models.Model):
     def finalize_invoice_move_lines(self, move_lines):
         move_lines = super(AccountInvoice,
                            self).finalize_invoice_move_lines(move_lines)
-        new_move_lines = []
-        for line_tuple in move_lines:
-            if self.operating_unit_id:
-                line_tuple[2]['operating_unit_id'] = \
-                    self.operating_unit_id.id
-            new_move_lines.append(line_tuple)
-        return new_move_lines
+        if self.operating_unit_id:
+            for line_tuple in move_lines:
+                line_tuple[2]['operating_unit_id'] = self.operating_unit_id.id
+        return move_lines
 
     @api.multi
     @api.constrains('operating_unit_id', 'company_id')
     def _check_company_operating_unit(self):
-        for pr in self:
-            if (
-                pr.company_id and
-                pr.operating_unit_id and
-                pr.company_id != pr.operating_unit_id.company_id
-            ):
+        for invoice in self:
+            if (invoice.operating_unit_id and
+                    invoice.company_id != invoice.operating_unit_id.company_id):
                 raise ValidationError(_('The Company in the Invoice and in '
                                         'Operating Unit must be the same.'))
         return True

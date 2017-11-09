@@ -6,11 +6,11 @@
         <field name="model">account.journal</field>
         <field name="inherit_id" ref="account.view_account_journal_form"/>
         <field name="arch" type="xml">
-            <field name="company_id" position="after">
+            <field name="company_id" position="before">
                 <field name="operating_unit_id"
                        options="{'no_create': True}"
                        groups="operating_unit.group_multi_operating_unit"
-                       attrs="{'invisible':[('type','not in', ['bank', 'cash'])]}"/>
+                       attrs="{'invisible':[('type','not in', ['bank', 'cash'])], 'required': [('type','in', ['bank', 'cash'])]}"/>
             </field>
         </field>
     </record>

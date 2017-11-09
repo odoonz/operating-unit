@@ -2,7 +2,7 @@
 # © 2016 Serpent Consulting Services Pvt. Ltd.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html).
 from odoo import api, fields, models, _
-from odoo.exceptions import UserError
+from odoo.exceptions import ValidationError
 
 
 class AccountJournal(models.Model):
@@ -10,9 +10,15 @@ class AccountJournal(models.Model):
 
     operating_unit_id = fields.Many2one(comodel_name='operating.unit',
                                         string='Operating Unit',
+                                        index=True,
                                         help="Operating Unit that will be "
                                              "used in payments, when this "
                                              "journal is used.")
+
+    @api.onchange('type')
+    def onchange_journal_type(self):
+        if self.type not in ['bank', 'cash']:
+            self.operating_unit_id = False
 
     @api.multi
     @api.constrains('type')
@@ -21,7 +27,7 @@ class AccountJournal(models.Model):
             if journal.type in ('bank', 'cash') \
                     and journal.company_id.ou_is_self_balanced \
                     and not journal.operating_unit_id:
-                raise UserError(_('Configuration error!\nThe operating unit '
-                                  'must be indicated in bank journals, '
-                                  'if it has been defined as self-balanced '
-                                  'at company level.'))
+                raise ValidationError(_(
+                    'Configuration error!\n'
+                    'The operating unit must be indicated in bank journals if '
+                    'it has been defined as self-balanced at company level.'))

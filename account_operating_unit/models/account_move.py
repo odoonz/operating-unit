@@ -1,9 +1,11 @@
 # © 2016-17 Eficent Business and IT Consulting Services S.L.
 # © 2016 Serpent Consulting Services Pvt. Ltd.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html).
+from collections import defaultdict
+
 from odoo.tools.translate import _
 from odoo import api, fields, models
-from odoo.exceptions import UserError
+from odoo.exceptions import ValidationError
 
 
 class AccountMoveLine(models.Model):
@@ -38,9 +40,10 @@ class AccountMoveLine(models.Model):
         for rec in self:
             if (rec.company_id and rec.operating_unit_id and rec.company_id !=
                     rec.operating_unit_id.company_id):
-                raise UserError(_('Configuration error!\nThe Company in the'
-                                  ' Move Line and in the Operating Unit must '
-                                  'be the same.'))
+                raise ValidationError(_(
+                    'Configuration error!\n'
+                    'The Company in the move line and '
+                    'Operating Unit must be the same.'))
 
     @api.multi
     @api.constrains('operating_unit_id', 'move_id')
@@ -49,9 +52,10 @@ class AccountMoveLine(models.Model):
             if (rec.move_id and rec.move_id.operating_unit_id and
                 rec.operating_unit_id and rec.move_id.operating_unit_id !=
                     rec.operating_unit_id):
-                raise UserError(_('Configuration error!\nThe Operating Unit in'
-                                  ' the Move Line and in the Move must be the'
-                                  ' same.'))
+                raise ValidationError(_(
+                    'Configuration error!\n'
+                    'The Operating Unit in the move line and the move '
+                    'must be the same.'))
 
 
 class AccountMove(models.Model):
@@ -66,8 +70,10 @@ class AccountMove(models.Model):
     def _prepare_inter_ou_balancing_move_line(self, move, ou_id,
                                               ou_balances):
         if not move.company_id.inter_ou_clearing_account_id:
-            raise UserError(_('Error!\nYou need to define an inter-operating\
-                unit clearing account in the company settings'))
+            raise ValidationError(_(
+                'Error!\n'
+                'You need to define an inter-operating '
+                'unit clearing account in the company settings'))
 
         res = {
             'name': 'OU-Balancing',
@@ -88,10 +94,8 @@ class AccountMove(models.Model):
     @api.multi
     def _check_ou_balance(self, move):
         # Look for the balance of each OU
-        ou_balance = {}
+        ou_balance = defaultdict(float)
         for line in move.line_ids:
-            if line.operating_unit_id.id not in ou_balance:
-                ou_balance[line.operating_unit_id.id] = 0.0
             ou_balance[line.operating_unit_id.id] += (line.debit - line.credit)
         return ou_balance
 
@@ -104,12 +108,10 @@ class AccountMove(models.Model):
 
             # If all move lines point to the same operating unit, there's no
             # need to create a balancing move line
-            ou_list_ids = [line.operating_unit_id and
-                           line.operating_unit_id.id for line in
-                           move.line_ids if line.operating_unit_id]
-            if len(ou_list_ids) <= 1:
+            if len(move.line_ids.mapped(
+                    lambda r: r.operating_unit_id or
+                    self.env['operating.unit'])) <= 1:
                 continue
-
             # Create balancing entries for un-balanced OU's.
             ou_balances = self._check_ou_balance(move)
             amls = []
@@ -122,16 +124,16 @@ class AccountMove(models.Model):
                 line_data = self._prepare_inter_ou_balancing_move_line(
                     move, ou_id, ou_balances)
                 if line_data:
-                    amls.append(ml_obj.with_context(wip=True).
+                    amls.append(ml_obj.with_context(skip_ou_check=True).
                                 create(line_data))
             if amls:
-                move.with_context(wip=False).\
-                    write({'line_ids': [(4, aml.id) for aml in amls]})
+                move.with_context(skip_ou_check=False).write(
+                    {'line_ids': [(4, aml.id) for aml in amls]})
 
         return super(AccountMove, self).post()
 
     def assert_balanced(self):
-        if self.env.context.get('wip'):
+        if self.env.context.get('skip_ou_check'):
             return True
         return super(AccountMove, self).assert_balanced()
 
@@ -143,6 +145,8 @@ class AccountMove(models.Model):
                 continue
             for line in move.line_ids:
                 if not line.operating_unit_id:
-                    raise UserError(_('Configuration error!\nThe operating\
-                    unit must be completed for each line if the operating\
-                    unit has been defined as self-balanced at company level.'))
+                    raise ValidationError(_(
+                        'Configuration error!\n'
+                        'The operating unit must be completed for each line '
+                        'if the operating unit has been defined as '
+                        'self-balanced at company level.'))
