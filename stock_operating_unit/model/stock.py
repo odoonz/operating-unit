@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
 # © 2016-2017 Eficent Business and IT Consulting Services S.L.
 # © 2016-2017 Serpent Consulting Services Pvt. Ltd.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html).
-from openerp import _, api, fields, models
-from openerp.exceptions import UserError
+from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
 
 
 class StockWarehouse(models.Model):
@@ -31,9 +30,10 @@ class StockWarehouse(models.Model):
         for rec in self:
             if (rec.company_id and rec.operating_unit_id and
                     rec.company_id != rec.operating_unit_id.company_id):
-                raise UserError(
-                    _('Configuration error\nThe Company in the Stock Warehouse'
-                      ' and in the Operating Unit must be the same.')
+                raise ValidationError(
+                    _('Configuration error\n'
+                      'The Company in the Stock Warehouse '
+                      'and in the Operating Unit must be the same.')
                 )
 
 
@@ -54,31 +54,36 @@ class StockLocation(models.Model):
                  ('wh_output_stock_loc_id', 'in', rec.ids)])
             for w in warehouses:
                 if rec.operating_unit_id != w.operating_unit_id:
-                    raise UserError(_('Configuration error\nThis location is '
-                                      'assigned to a warehouse that belongs to'
-                                      ' a different operating unit.'))
+                    raise ValidationError(_(
+                        'Configuration error\n'
+                        'This location is assigned to a warehouse that '
+                        'belongs to a different operating unit.'))
                 if rec.operating_unit_id != w.operating_unit_id:
-                    raise UserError(_('Configuration error\nThis location is '
-                                      'assigned to a warehouse that belongs to'
-                                      ' a different operating unit.'))
+                    raise ValidationError(_(
+                        'Configuration error\n'
+                        'This location is assigned to a warehouse that '
+                        'belongs to a different operating unit.'))
                 if rec.operating_unit_id != w.operating_unit_id:
-                    raise UserError(_('Configuration error\nThis location is'
-                                      ' assigned to a warehouse that belongs'
-                                      ' to a different operating unit.'))
+                    raise ValidationError(_(
+                        'Configuration error\n'
+                        'This location is assigned to a warehouse that '
+                        'belongs to a different operating unit.'))
 
     @api.multi
     @api.constrains('operating_unit_id')
     def _check_required_operating_unit(self):
         for rec in self:
             if rec.usage == 'internal' and not rec.operating_unit_id:
-                raise UserError(
-                    _('Configuration error\nThe operating unit should be '
-                      'assigned to internal locations and to non other.')
+                raise ValidationError(
+                    _('Configuration error\n'
+                      'The operating unit should only be '
+                      'assigned to internal locations.')
                 )
             if rec.usage != 'internal' and rec.operating_unit_id:
-                raise UserError(
-                    _('Configuration error\nThe operating unit should be '
-                      'assigned to internal locations and to non other.')
+                raise ValidationError(
+                    _('Configuration error\n'
+                      'The operating unit should only be '
+                      'assigned to internal locations.')
                 )
 
     @api.multi
@@ -87,8 +92,9 @@ class StockLocation(models.Model):
         for rec in self:
             if (rec.company_id and rec.operating_unit_id and
                     rec.company_id != rec.operating_unit_id.company_id):
-                raise UserError(
-                    _('Configuration error\nThe Company in the Stock Location '
+                raise ValidationError(
+                    _('Configuration error\n'
+                      'The Company in the Stock Location '
                       'and in the Operating Unit must be the same.'))
 
     @api.multi
@@ -101,8 +107,9 @@ class StockLocation(models.Model):
                 rec.operating_unit_id and
                 rec.operating_unit_id != rec.location_id.operating_unit_id
             ):
-                raise UserError(
-                    _('Configuration error\nThe Parent Stock Location '
+                raise ValidationError(
+                    _('Configuration error\n'
+                      'The Parent Stock Location '
                       'must belong to the same Operating Unit.')
                 )
 
@@ -128,8 +135,9 @@ class StockPicking(models.Model):
         for rec in self:
             if (rec.company_id and rec.operating_unit_id and
                     rec.company_id != rec.operating_unit_id.company_id):
-                raise UserError(
-                    _('Configuration error\nThe Company in the Stock Picking '
+                raise ValidationError(
+                    _('Configuration error\n'
+                      'The Company in the Stock Picking '
                       'and in the Operating Unit must be the same.')
                 )
 
@@ -140,10 +148,10 @@ class StockPicking(models.Model):
             warehouse = rec.picking_type_id.warehouse_id
             if (rec.picking_type_id and rec.operating_unit_id and
                     warehouse.operating_unit_id != rec.operating_unit_id):
-                raise UserError(
-                    _('Configuration error\nThe Operating Unit of the picking '
-                      'must be the same as that of the warehouse of the '
-                      'Picking Type.')
+                raise ValidationError(
+                    _('Configuration error\n'
+                      'The Operating Unit of the picking must be the same as '
+                      'that of the warehouse of the Picking Type.')
                 )
 
 
@@ -162,8 +170,7 @@ class StockMove(models.Model):
     )
 
     @api.multi
-    @api.constrains('operating_unit_id', 'location_id', 'picking_id',
-                    'operating_unit_dest_id', 'location_dest_id')
+    @api.constrains('location_id', 'picking_id', 'location_dest_id')
     def _check_stock_move_operating_unit(self):
         for stock_move in self:
             if not stock_move.operating_unit_id:
@@ -180,8 +187,9 @@ class StockMove(models.Model):
                 stock_move.picking_id and
                 operating_unit_dest != stock_move.picking_id.operating_unit_id
             ):
-                raise UserError(
-                    _('Configuration error\nThe Stock moves must '
-                      'be related to a location (source or destination) '
-                      'that belongs to the requesting Operating Unit.')
+                raise ValidationError(
+                    _('Configuration error\n'
+                      'The Stock moves must be related to a location '
+                      '(source or destination) that belongs to the '
+                      'requesting Operating Unit.')
                 )
