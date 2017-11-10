@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # © 2015-17 Eficent Business and IT Consulting Services S.L. -
 # Jordi Ballester Alomar
 # © 2015-17 Serpent Consulting Services Pvt. Ltd. - Sudhir Arya
@@ -19,5 +18,5 @@ class StockWarehouse(models.Model):
                 ('operating_unit_id', '!=', rec.operating_unit_id.id)])
             if sales:
                 raise ValidationError(_(
-                    'Sales Order records already exist(s) for this warehouse'
-                    ' and operating unit.'))
+                    'Sales Order records already exist(s) for this warehouse '
+                    'and operating unit.'))

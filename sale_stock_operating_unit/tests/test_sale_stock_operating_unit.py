@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # © 2015-17 Eficent Business and IT Consulting Services S.L. -
 # Jordi Ballester Alomar
 # © 2015-17 Serpent Consulting Services Pvt. Ltd. - Sudhir Arya
@@ -13,20 +12,16 @@ class TestSaleStockOperatingUnit(test_sale_operating_unit.
     def setUp(self):
         super(TestSaleStockOperatingUnit, self).setUp()
 
-    def _confirm_sale(self, sale):
-        sale.action_confirm()
-        return True
-
     def test_security(self):
         """Test Sale Operating Unit"""
         # Confirm Sale1
-        self._confirm_sale(self.sale1)
+        self.sale1.action_confirm()
         # Checks that OU in sale order and stock picking matches or not.
         self.assertEqual(self.sale1.operating_unit_id,
                          self.sale1.picking_ids.operating_unit_id,
                          'OU in Sale Order and Picking should be same')
         # Confirm Sale2
-        self._confirm_sale(self.sale2)
+        self.sale2.action_confirm()
         # Checks that OU in sale order and stock picking matches or not.
         self.assertEqual(self.sale2.operating_unit_id,
                          self.sale2.picking_ids.operating_unit_id,

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # © 2015-17 Eficent Business and IT Consulting Services S.L. -
 # Jordi Ballester Alomar
 # © 2015-17 Serpent Consulting Services Pvt. Ltd. - Sudhir Arya
@@ -8,7 +7,7 @@
     "name": "Operating Unit in Sales Stock",
     "summary": "An operating unit (OU) is an organizational entity part of a "
                "company",
-    "version": "10.0.1.0.0",
+    "version": "11.0.1.0.0",
     "author": "Eficent, Serpent Consulting Services Pvt. Ltd., "
               "Odoo Community Association (OCA)",
     "license": "LGPL-3",
