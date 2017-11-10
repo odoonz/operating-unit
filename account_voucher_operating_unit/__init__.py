@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # © 2015-17 Eficent
 # - Jordi Ballester Alomar
 # © 2015 Ecosoft Co. Ltd. - Kitti Upariphutthiphong

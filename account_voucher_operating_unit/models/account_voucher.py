@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # © 2015 Eficent
 # - Jordi Ballester Alomar
 # © 2015 Ecosoft Co. Ltd. - Kitti Upariphutthiphong
@@ -24,7 +23,7 @@ class AccountVoucher(models.Model):
     )
 
     @api.multi
-    @api.constrains('operating_unit_id', 'company_id')
+    @api.constrains('operating_unit_id')
     def _check_company_operating_unit(self):
         for rec in self:
             if rec.company_id and rec.operating_unit_id and \
@@ -70,13 +69,4 @@ class AccountVoucherLine(models.Model):
         'operating.unit',
         related='voucher_id.operating_unit_id',
         string='Operating Unit', readonly=True,
-        store=True,
     )
-
-    @api.model
-    def create(self, vals):
-        if 'operating_unit_id' not in vals:
-            voucher = self.env['account.voucher'].browse(vals['voucher_id'])
-            if voucher.operating_unit_id:
-                vals['operating_unit_id'] = voucher.operating_unit_id.id
-        return super(AccountVoucherLine, self).create(vals)

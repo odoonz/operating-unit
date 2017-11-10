@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # © 2015-17 Eficent
 # - Jordi Ballester Alomar
 # © 2015 Ecosoft Co. Ltd. - Kitti Upariphutthiphong
@@ -34,7 +33,7 @@ class TestAccountVoucherOperatingUnit(common.TransactionCase):
         # company
         self.company1 = self.env.ref('base.main_company')
         # groups
-        self.group_account_user = self.env.ref('account.group_account_user')
+        self.group_account_user = self.env.ref('account.group_account_manager')
         # Main Operating Unit
         self.ou1 = self.env.ref('operating_unit.main_operating_unit')
         # B2C Operating Unit
@@ -97,8 +96,8 @@ class TestAccountVoucherOperatingUnit(common.TransactionCase):
             'type': 'sale',
             'company_id': company,
             'code': code,
-            'default_debit_account_id': accdeb,
-            'default_credit_account_id': acccre})
+            'default_debit_account_id': accdeb.id,
+            'default_credit_account_id': acccre.id})
         return journal.id
 
     def _create_account(self, company, utype, code):
@@ -108,7 +107,7 @@ class TestAccountVoucherOperatingUnit(common.TransactionCase):
             'user_type_id': utype,
             'company_id': company,
             'code': code})
-        return account.id
+        return account
 
     def _create_customer_receipt(self, operating_unit, journal):
         """Create receipt"""
@@ -134,7 +133,8 @@ class TestAccountVoucherOperatingUnit(common.TransactionCase):
             'name': self.product1.name,
             'quantity': 100,
             'price_unit': 100,
-            'account_id': 17
+            'account_id': self.product1.product_tmpl_id\
+                .get_product_accounts()['income'].id
         }
         # Create receipt
         line = self.VoucherLine.create(rec_vals)

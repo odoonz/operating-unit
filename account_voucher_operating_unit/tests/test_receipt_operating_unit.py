@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # © 2015-17 Eficent
 # - Jordi Ballester Alomar
 # © 2015 Ecosoft Co. Ltd. - Kitti Upariphutthiphong
@@ -30,10 +29,10 @@ class TestReceiptOU(test_ou.TestAccountVoucherOperatingUnit):
             for move_line2 in self.receipt2.move_id.line_ids)
         # Assert if journal entries of the receipt
         # have different operating units
-        self.assertNotEqual(all_op_units1, False, 'Journal Entries have\
-                            different Operating Units.')
-        self.assertNotEqual(all_op_units2, False, 'Journal Entries have\
-            different Operating Units.')
+        self.assertNotEqual(all_op_units1, False,
+                            'Journal Entries have different Operating Units.')
+        self.assertNotEqual(all_op_units2, False,
+                            'Journal Entries have different Operating Units.')
 
         # user_b2c, on customer receipt, show only invoices on B2C
         # user_all will see both Main OU and B2C moves (2 records)

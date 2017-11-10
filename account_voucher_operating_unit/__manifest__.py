@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # © 2015-17 Eficent
 # - Jordi Ballester Alomar
 # © 2015 Ecosoft Co. Ltd. - Kitti Upariphutthiphong
@@ -7,7 +6,7 @@
 {
     'name': 'Vouchers with Operating Units',
     'summary': 'Introduces the operating unit to vouchers',
-    'version': '10.0.1.0.0',
+    'version': '11.0.1.0.0',
     'category': 'Generic Modules/Sales & Purchases',
     "author": "Eficent, "
               "Ecosoft Co. Ltd.,"
