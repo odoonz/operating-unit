@@ -21,6 +21,9 @@ class SaleOrder(models.Model):
         comodel_name='operating.unit',
         string='Operating Unit',
         default=_default_operating_unit,
+        readonly=True,
+        states={'draft': [('readonly', False)],
+                'sent': [('readonly', False)]},
     )
 
     @api.onchange('team_id')
