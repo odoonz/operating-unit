@@ -9,10 +9,14 @@ from odoo.tools.translate import _
 class AccountInvoice(models.Model):
     _inherit = "account.invoice"
 
-    operating_unit_id = fields.Many2one('operating.unit', 'Operating Unit',
-                                        default=lambda self:
-                                        self.env['res.users'].
-                                        operating_unit_default_get(self._uid))
+    operating_unit_id = fields.Many2one(
+        comodel_name='operating.unit',
+        string='Operating Unit',
+        default=lambda self: self.env['res.users'].operating_unit_default_get(
+            self._uid),
+        readonly=True,
+        states={'draft': [('readonly', False)]},
+    )
 
     @api.multi
     def finalize_invoice_move_lines(self, move_lines):
@@ -26,9 +30,9 @@ class AccountInvoice(models.Model):
     @api.multi
     @api.constrains('operating_unit_id', 'company_id')
     def _check_company_operating_unit(self):
-        for invoice in self:
-            if (invoice.operating_unit_id and
-                    invoice.company_id != invoice.operating_unit_id.company_id):
+        for inv in self:
+            if (inv.operating_unit_id and
+                    inv.company_id != inv.operating_unit_id.company_id):
                 raise ValidationError(_('The Company in the Invoice and in '
                                         'Operating Unit must be the same.'))
         return True
