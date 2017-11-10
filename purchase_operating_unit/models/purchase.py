@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # © 2015-17 Eficent Business and IT Consulting Services S.L.
 # - Jordi Ballester Alomar
 # © 2015-17 Serpent Consulting Services Pvt. Ltd. - Sudhir Arya
@@ -60,7 +59,8 @@ class PurchaseOrder(models.Model):
                     record.operating_unit_id and
                     warehouse.operating_unit_id != record.operating_unit_id):
                 raise ValidationError(
-                    _('Configuration error\nThe Quotation / Purchase Order '
+                    _('Configuration error\n'
+                      'The Quotation / Purchase Order '
                       'and the Warehouse of picking type must belong to the '
                       'same Operating Unit.')
                 )
@@ -72,7 +72,8 @@ class PurchaseOrder(models.Model):
             if (record.company_id and record.operating_unit_id and
                     record.company_id != record.operating_unit_id.company_id):
                 raise ValidationError(
-                    _('Configuration error\nThe Company in the Purchase Order '
+                    _('Configuration error\n'
+                      'The Company in the Purchase Order '
                       'and in the Operating Unit must be the same.')
                 )
 
@@ -104,7 +105,7 @@ class PurchaseOrderLine(models.Model):
     operating_unit_id = fields.Many2one(related='order_id.operating_unit_id',
                                         string='Operating Unit', readonly=True)
 
-    @api.constrains('operating_unit_id', 'invoice_lines')
+    @api.constrains('invoice_lines')
     def _check_invoice_ou(self):
         for line in self:
             for inv_line in line.invoice_lines:

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # © 2015-17 Eficent Business and IT Consulting Services S.L.
 # - Jordi Ballester Alomar
 # © 2015-17 Serpent Consulting Services Pvt. Ltd. - Sudhir Arya
@@ -31,7 +30,11 @@ class TestPurchaseOperatingUnit(test_purchase_order.TestPurchaseOrder):
         self.product2 = self.env.ref('product.product_product_9')
         self.product3 = self.env.ref('product.product_product_11')
         # Account
-        self.account = self.env.ref('l10n_generic_coa.conf_a_pay')
+        self.account = self.env['account.account'].search(
+            [('code', '=like',
+              self.env.ref('l10n_generic_coa.conf_a_pay').code + '%')],
+            limit=1
+        )
         # Create users
         self.user1_id = self._create_user('user_1',
                                           [self.group_purchase_user,
