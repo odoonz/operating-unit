@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # © 2015-17 Eficent Business and IT Consulting Services S.L.
 # - Jordi Ballester Alomar
 # © 2015-17 Serpent Consulting Services Pvt. Ltd. - Sudhir Arya
@@ -21,7 +20,7 @@ class SaleOrder(models.Model):
     operating_unit_id = fields.Many2one(
         comodel_name='operating.unit',
         string='Operating Unit',
-        default=_default_operating_unit
+        default=_default_operating_unit,
     )
 
     @api.onchange('team_id')
@@ -50,7 +49,7 @@ class SaleOrder(models.Model):
     @api.constrains('operating_unit_id', 'company_id')
     def _check_company_operating_unit(self):
         for rec in self:
-            if (rec.company_id and rec.operating_unit_id and
+            if (rec.operating_unit_id and
                     rec.company_id != rec.operating_unit_id.company_id):
                 raise ValidationError(_('Configuration error\nThe Company in'
                                         ' the Sales Order and in the Operating'
