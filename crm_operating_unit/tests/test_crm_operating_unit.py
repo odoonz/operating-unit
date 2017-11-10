@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # © 2015-17 Eficent Business and IT Consulting Services S.L. -
 # Jordi Ballester Alomar
 # © 2015-17 Serpent Consulting Services Pvt. Ltd. - Sudhir Arya
@@ -23,13 +22,13 @@ class TestCrmOperatingUnit(common.TransactionCase):
         # B2C Operating Unit
         self.b2c_OU = self.env.ref('operating_unit.b2c_operating_unit')
         # Create User 1 with Main OU
-        self.user1 = self._create_user('user_1', [self.grp_sale_mngr,
-                                                  self.grp_user],
-                                       self.company, [self.main_OU])
+        self.user1 = self._create_user(
+            'user_1', [self.grp_sale_mngr, self.grp_user],
+            self.company, [self.main_OU])
         # Create User 2 with B2C OU
-        self.user2 = self._create_user('user_2', [self.grp_sale_mngr,
-                                                  self.grp_user],
-                                       self.company, [self.b2c_OU])
+        self.user2 = self._create_user(
+            'user_2', [self.grp_sale_mngr, self.grp_user],
+            self.company, [self.b2c_OU])
 
         self.team1 = self._create_crm_team(self.user1.id, self.main_OU)
         self.team2 = self._create_crm_team(self.user2.id, self.b2c_OU)
@@ -40,7 +39,7 @@ class TestCrmOperatingUnit(common.TransactionCase):
 
     def _create_user(self, login, groups, company, operating_units):
         """ Create a user. """
-        group_ids = [group.id for group in groups]
+        group_ids = [g.id for g in groups]
         user = self.res_users_model.create({
             'name': login,
             'login': login,
