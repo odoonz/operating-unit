@@ -38,7 +38,8 @@
             <field name="journal_id" position="before">
                 <field name="operating_unit_id"
                        options="{'no_create': True}"
-                       widget="selection" groups="operating_unit.group_multi_operating_unit"/>
+                       widget="selection" groups="operating_unit.group_multi_operating_unit"
+                       domain="[('company_id', '=', company_id)]"/>
             </field>
             <xpath  expr="//field[@name='invoice_line_ids']"
                     position="attributes">
@@ -46,7 +47,10 @@
             </xpath>
             <xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='account_analytic_id']"
                    position="attributes">
-                <attribute name="domain">[('company_id', '=', parent.company_id), '|', ('operating_unit_ids', 'in', [operating_unit]), ('operating_unit_ids', '=', False)]</attribute>
+                <attribute name="domain">[('company_id', '=', parent.company_id), '|', ('operating_unit_ids', 'in', [operating_unit_id]), ('operating_unit_ids', '=', False)]</attribute>
+            </xpath>
+            <xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='account_analytic_id']" position="after">
+                <field name="operating_unit_id" invisible="1" />
             </xpath>
             <xpath  expr="//field[@name='tax_line_ids']"
                     position="attributes">
@@ -54,7 +58,7 @@
             </xpath>
             <xpath expr="//field[@name='tax_line_ids']/tree/field[@name='account_analytic_id']"
                    position="attributes">
-                <attribute name="domain">[('company_id', '=', parent.company_id), '|', ('operating_unit_ids', 'in', [operating_unit]), ('operating_unit_ids', '=', False)]</attribute>
+                <attribute name="domain">[('company_id', '=', parent.company_id), '|', ('operating_unit_ids', 'in', [operating_unit_id]), ('operating_unit_ids', '=', False)]</attribute>
             </xpath>
         </field>
     </record>
@@ -67,7 +71,8 @@
             <field name="journal_id" position="before">
                 <field name="operating_unit_id"
                        options="{'no_create': True}"
-                       widget="selection" groups="operating_unit.group_multi_operating_unit"/>
+                       widget="selection" groups="operating_unit.group_multi_operating_unit"
+                       domain="[('company_id', '=', company_id)]" />
             </field>
             <xpath  expr="//field[@name='invoice_line_ids']"
                     position="attributes">
