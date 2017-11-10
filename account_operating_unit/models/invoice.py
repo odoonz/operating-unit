@@ -16,6 +16,7 @@ class AccountInvoice(models.Model):
             self._uid),
         readonly=True,
         states={'draft': [('readonly', False)]},
+        index=True,
     )
 
     @api.multi
@@ -41,7 +42,9 @@ class AccountInvoice(models.Model):
 class AccountInvoiceLine(models.Model):
     _inherit = 'account.invoice.line'
 
-    operating_unit_id = fields.Many2one('operating.unit',
-                                        related='invoice_id.operating_unit_id',
-                                        string='Operating Unit', store=True,
-                                        readonly=True)
+    operating_unit_id = fields.Many2one(
+        comodel_name='operating.unit',
+        related='invoice_id.operating_unit_id',
+        string='Operating Unit',
+        readonly=True,
+    )
