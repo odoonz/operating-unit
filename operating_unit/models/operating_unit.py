@@ -14,9 +14,16 @@ class OperatingUnit(models.Model):
     code = fields.Char('Code', required=True)
     active = fields.Boolean('Active', default=True)
     company_id = fields.Many2one(
-        'res.company', 'Company', required=True, default=lambda self:
-        self.env['res.company']._company_default_get('account.account'))
-    partner_id = fields.Many2one('res.partner', 'Partner', required=True)
+        comodel_name='res.company',
+        string='Company',
+        required=True,
+        default=lambda s: s.env['res.company']._company_default_get(s._name)
+    )
+    partner_id = fields.Many2one(
+        comodel_name='res.partner',
+        string='Partner',
+        required=True
+    )
 
     _sql_constraints = [
         ('code_company_uniq', 'unique (code,company_id)',
@@ -26,6 +33,14 @@ class OperatingUnit(models.Model):
          'The name of the operating unit must '
          'be unique per company!')
     ]
+
+    @api.multi
+    def copy(self, default=None):
+        if default is None:
+            default = {}
+        default.update({'name': self.name + ' (Copy)',
+                        'code': self.code + ' (Copy)'})
+        return super(OperatingUnit, self).copy(default=default)
 
     @api.model
     def name_search(self, name='', args=None, operator='ilike', limit=100):
