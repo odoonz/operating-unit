@@ -3,7 +3,10 @@
 [![Coverage Status](https://coveralls.io/repos/OCA/operating-unit/badge.svg?branch=11.0&service=github)](https://coveralls.io/github/OCA/operating-unit?branch=11.0)
 [![Code Climate](https://codeclimate.com/github/OCA/operating-unit/badges/gpa.svg)](https://codeclimate.com/github/OCA/operating-unit)
 
-# Operating Units
+# Operating Segments
+
+This module is a fork of OCA Operating Unit, designed to better meet the reporting requirements
+of both decision makers and IFRS 8 Operating Segments.
 
 An Operating Unit (OU) is an organizational entity part of a company, 
 but that operates as an independent unit. Organizationally, an Operating Unit 
@@ -13,7 +16,25 @@ company from a functional axis perspective.
 This repository provides a suite of module to support the Operating Unit concept
 across all Odoo processes.
 
+[//]: # (addons)
 
+Available addons
+----------------
+addon | version | summary
+--- | --- | ---
+[account_operating_unit](account_operating_unit/) | 11.0.1.0.0 | Introduces Operating Unit fields in invoices and Accounting Entries with clearing account
+[account_voucher_operating_unit](account_voucher_operating_unit/) | 11.0.1.0.0 | Introduces the operating unit to vouchers
+[analytic_operating_unit](analytic_operating_unit/) | 11.0.1.0.0 | Analytic Operating Unit
+[crm_operating_unit](crm_operating_unit/) | 11.0.1.0.0 | Operating Unit in CRM
+[operating_unit](operating_unit/) | 11.0.1.0.0 | An operating unit (OU) is an organizational entity part of a company
+[purchase_operating_unit](purchase_operating_unit/) | 11.0.1.0.0 | An operating unit (OU) is an organizational entity part of a company
+[sale_operating_unit](sale_operating_unit/) | 11.0.1.0.0 | An operating unit (OU) is an organizational entity part of a company
+[sale_stock_operating_unit](sale_stock_operating_unit/) | 11.0.1.0.0 | An operating unit (OU) is an organizational entity part of a company
+[sales_team_operating_unit](sales_team_operating_unit/) | 11.0.1.0.0 | Sales Team Operating Unit
+[stock_account_operating_unit](stock_account_operating_unit/) | 11.0.1.0.0 | Adds more sophisticated stock accounting to operating units
+[stock_operating_unit](stock_operating_unit/) | 11.0.1.0.0 | An operating unit (OU) is an organizational entity part of a company
+
+[//]: # (end addons)
 
 Translation Status
 ------------------
