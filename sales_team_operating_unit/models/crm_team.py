@@ -4,24 +4,27 @@
 #   (<http://www.serpentcs.com>)
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html).
 from odoo import api, fields, models, _
-from odoo.exceptions import UserError
+from odoo.exceptions import ValidationError
 
 
 class CrmTeam(models.Model):
 
     _inherit = 'crm.team'
 
-    operating_unit_id = fields.Many2one('operating.unit', 'Operating Unit',
-                                        default=lambda self:
-                                        self.env['res.users'].
-                                        operating_unit_default_get(self._uid))
+    operating_unit_id = fields.Many2one(
+        comodel_name='operating.unit',
+        string='Operating Unit',
+        default=lambda self: self.env.user.default_operating_unit_id,
+        required=True,
+    )
 
     @api.multi
     @api.constrains('operating_unit_id', 'company_id')
     def _check_company_operating_unit(self):
-        for team in self:
-            if team.company_id and \
-                    team.operating_unit_id and \
-                    team.company_id != team.operating_unit_id.company_id:
-                raise UserError(_('Configuration error!\n\nThe Company in the\
-                Sales Team and in the Operating Unit must be the same.'))
+        if self.filtered(lambda t: (
+                t.company_id and
+                t.company_id != t.operating_unit_id.company_id)):
+            raise ValidationError(
+                _('Configuration error!\n'
+                  'The Company in the Sales Team and in the Operating Unit '
+                  'must be the same.'))

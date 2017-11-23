@@ -20,7 +20,7 @@ class TestSaleTeamOperatingUnit(common.TransactionCase):
         # Main Operating Unit
         self.ou1 = self.env.ref('operating_unit.main_operating_unit')
         # B2C Operating Unit
-        self.b2c = self.env.ref('operating_unit.b2c_operating_unit')
+        self.b2c = self.env.ref('operating_Unit.b2c_operating_unit')
         # Create User 1 with Main OU
         self.user1 = self._create_user('user_1', [self.grp_sale_mngr,
                                                   self.grp_user], self.company,
