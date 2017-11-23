@@ -24,6 +24,7 @@ class SaleOrder(models.Model):
         readonly=True,
         states={'draft': [('readonly', False)],
                 'sent': [('readonly', False)]},
+        index=True,
     )
 
     @api.onchange('team_id')
@@ -33,8 +34,8 @@ class SaleOrder(models.Model):
 
     @api.onchange('operating_unit_id')
     def onchange_operating_unit_id(self):
-        if self.team_id and self.team_id.operating_unit_id != \
-                self.operating_unit_id:
+        if (self.team_id and
+                self.team_id.operating_unit_id != self.operating_unit_id):
             self.team_id = False
 
     @api.multi
@@ -43,10 +44,11 @@ class SaleOrder(models.Model):
         for rec in self:
             if (rec.team_id and
                     rec.team_id.operating_unit_id != rec.operating_unit_id):
-                raise ValidationError(_('Configuration error\n'
-                                        'The Operating Unit of the sales team '
-                                        'must match with that of the '
-                                        'quote/sales order'))
+                raise ValidationError(_(
+                    'Configuration error\n'
+                    'The Operating Unit of the sales team must match with '
+                    'that of the quote/sales order.'
+                ))
 
     @api.multi
     @api.constrains('operating_unit_id', 'company_id')
@@ -54,9 +56,11 @@ class SaleOrder(models.Model):
         for rec in self:
             if (rec.operating_unit_id and
                     rec.company_id != rec.operating_unit_id.company_id):
-                raise ValidationError(_('Configuration error\nThe Company in'
-                                        ' the Sales Order and in the Operating'
-                                        ' Unit must be the same.'))
+                raise ValidationError(_(
+                    'Configuration error\n'
+                    'The Company in the Sales Order and in the '
+                    'Operating Unit must be the same.'
+                ))
 
     @api.multi
     def _prepare_invoice(self):
@@ -69,6 +73,7 @@ class SaleOrder(models.Model):
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
 
-    operating_unit_id = fields.Many2one(related='order_id.operating_unit_id',
-                                        string='Operating Unit',
-                                        readonly=True)
+    operating_unit_id = fields.Many2one(
+        related='order_id.operating_unit_id',
+        string='Operating Unit',
+        readonly=True)
