@@ -11,14 +11,15 @@ from odoo.exceptions import ValidationError
 class AccountMoveLine(models.Model):
     _inherit = "account.move.line"
 
-    operating_unit_id = fields.Many2one('operating.unit', 'Operating Unit',
-                                        default=lambda self:
-                                        self.env['res.users'].
-                                        operating_unit_default_get(self._uid))
+    operating_unit_id = fields.Many2one(
+        comodel_name='operating.unit',
+        string='Operating Unit',
+        default=lambda self: self.env.user.default_operating_unit_id,
+    )
 
     @api.model
     def create(self, vals):
-        if vals.get('move_id', False):
+        if not vals.get('operating_unit_id') and vals.get('move_id'):
             move = self.env['account.move'].browse(vals['move_id'])
             if move.operating_unit_id:
                 vals['operating_unit_id'] = move.operating_unit_id.id
@@ -103,9 +104,6 @@ class AccountMove(models.Model):
     def post(self):
         ml_obj = self.env['account.move.line']
         for move in self:
-            if not move.company_id.ou_is_self_balanced:
-                continue
-
             # If all move lines point to the same operating unit, there's no
             # need to create a balancing move line
             if len(move.line_ids.mapped(
@@ -141,8 +139,6 @@ class AccountMove(models.Model):
     @api.constrains('line_ids')
     def _check_ou(self):
         for move in self:
-            if not move.company_id.ou_is_self_balanced:
-                continue
             for line in move.line_ids:
                 if not line.operating_unit_id:
                     raise ValidationError(_(

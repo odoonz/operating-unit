@@ -1,35 +1,31 @@
 # © 2016-17 Eficent Business and IT Consulting Services S.L.
 # © 2016 Serpent Consulting Services Pvt. Ltd.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html).
-from odoo import api, fields, models, _
+from odoo import fields, models, _
 
 
 class AccountPayment(models.Model):
     _inherit = "account.payment"
 
-    @api.depends('journal_id')
-    def _compute_operating_unit_id(self):
-        for payment in self:
-            if payment.journal_id:
-                payment.operating_unit_id = \
-                    payment.journal_id.operating_unit_id
-
     operating_unit_id = fields.Many2one(
-        'operating.unit', string='Operating Unit',
-        compute='_compute_operating_unit_id', readonly=True, store=True)
+        comodel_name='operating.unit',
+        string='Operating Unit',
+        related='journal_id.operating_unit_id',
+        readonly=True,
+    )
 
     def _get_counterpart_move_line_vals(self, invoice=False):
         res = super(AccountPayment,
                     self)._get_counterpart_move_line_vals(invoice=invoice)
-        if invoice and len(invoice) == 1:
-            res['operating_unit_id'] = invoice.operating_unit_id.id
+        if invoice and len(invoice.mapped('operating_unit_id')) == 1:
+            res['operating_unit_id'] = invoice[0].operating_unit_id.id
         else:
             res['operating_unit_id'] = self.operating_unit_id.id
         return res
 
     def _get_liquidity_move_line_vals(self, amount):
         res = super(AccountPayment, self)._get_liquidity_move_line_vals(amount)
-        res['operating_unit_id'] = self.journal_id.operating_unit_id.id
+        res['operating_unit_id'] = self.operating_unit_id.id
         return res
 
     def _get_dst_liquidity_aml_dict_vals(self):
@@ -59,7 +55,7 @@ class AccountPayment(models.Model):
             'payment_id': self.id,
             'account_id': self.company_id.transfer_account_id.id,
             'journal_id': self.destination_journal_id.id,
-            'operating_unit_id': self.journal_id.operating_unit_id.id,
+            'operating_unit_id': self.operating_unit_id.id,
         }
         return transfer_debit_aml_dict
 

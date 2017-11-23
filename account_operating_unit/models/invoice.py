@@ -31,11 +31,11 @@ class AccountInvoice(models.Model):
     @api.multi
     @api.constrains('operating_unit_id', 'company_id')
     def _check_company_operating_unit(self):
-        for inv in self:
-            if (inv.operating_unit_id and
-                    inv.company_id != inv.operating_unit_id.company_id):
-                raise ValidationError(_('The Company in the Invoice and in '
-                                        'Operating Unit must be the same.'))
+        if self.filtered(lambda s: (s.operating_unit_id and
+                                    s.company_id !=
+                                    s.operating_unit_id.company_id)):
+            raise ValidationError(_('The Company in the Invoice and in '
+                                    'Operating Unit must be the same.'))
         return True
 
 
