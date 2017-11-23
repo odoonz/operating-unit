@@ -12,23 +12,24 @@ class StockWarehouse(models.Model):
         if self.company_id:
             company = self.company_id
         else:
-            company = self.env['res.company']._company_default_get(
-                'stock.inventory')
+            company = self.env['res.company']._company_default_get(self._name)
         for ou in self.env.user.operating_unit_ids:
             if company == self.company_id:
                 self.operating_unit_id = ou
+                return
 
     operating_unit_id = fields.Many2one(
         comodel_name='operating.unit',
         string='Operating Unit',
-        default=_default_operating_unit
+        default=_default_operating_unit,
+        required=True
     )
 
     @api.multi
     @api.constrains('operating_unit_id', 'company_id')
     def _check_company_operating_unit(self):
         for rec in self:
-            if (rec.company_id and rec.operating_unit_id and
+            if (rec.operating_unit_id and
                     rec.company_id != rec.operating_unit_id.company_id):
                 raise ValidationError(
                     _('Configuration error\n'
@@ -40,86 +41,26 @@ class StockWarehouse(models.Model):
 class StockLocation(models.Model):
     _inherit = 'stock.location'
 
-    operating_unit_id = fields.Many2one('operating.unit',
-                                        'Operating Unit')
+    def _compute_operating_unit(self):
+        for record in self:
+            record.operating_unit_id = record.get_warehouse().operating_unit_id
 
-    @api.multi
-    @api.constrains('operating_unit_id')
-    def _check_warehouse_operating_unit(self):
-        for rec in self:
-            warehouse_obj = self.env['stock.warehouse']
-            warehouses = warehouse_obj.search(
-                ['|', '|', ('wh_input_stock_loc_id', '=', rec.ids[0]),
-                 ('lot_stock_id', 'in', rec.ids),
-                 ('wh_output_stock_loc_id', 'in', rec.ids)])
-            for w in warehouses:
-                if rec.operating_unit_id != w.operating_unit_id:
-                    raise ValidationError(_(
-                        'Configuration error\n'
-                        'This location is assigned to a warehouse that '
-                        'belongs to a different operating unit.'))
-                if rec.operating_unit_id != w.operating_unit_id:
-                    raise ValidationError(_(
-                        'Configuration error\n'
-                        'This location is assigned to a warehouse that '
-                        'belongs to a different operating unit.'))
-                if rec.operating_unit_id != w.operating_unit_id:
-                    raise ValidationError(_(
-                        'Configuration error\n'
-                        'This location is assigned to a warehouse that '
-                        'belongs to a different operating unit.'))
-
-    @api.multi
-    @api.constrains('operating_unit_id')
-    def _check_required_operating_unit(self):
-        for rec in self:
-            if rec.usage == 'internal' and not rec.operating_unit_id:
-                raise ValidationError(
-                    _('Configuration error\n'
-                      'The operating unit should only be '
-                      'assigned to internal locations.')
-                )
-            if rec.usage != 'internal' and rec.operating_unit_id:
-                raise ValidationError(
-                    _('Configuration error\n'
-                      'The operating unit should only be '
-                      'assigned to internal locations.')
-                )
-
-    @api.multi
-    @api.constrains('operating_unit_id', 'company_id')
-    def _check_company_operating_unit(self):
-        for rec in self:
-            if (rec.company_id and rec.operating_unit_id and
-                    rec.company_id != rec.operating_unit_id.company_id):
-                raise ValidationError(
-                    _('Configuration error\n'
-                      'The Company in the Stock Location '
-                      'and in the Operating Unit must be the same.'))
-
-    @api.multi
-    @api.constrains('operating_unit_id', 'location_id')
-    def _check_parent_operating_unit(self):
-        for rec in self:
-            if (
-                rec.location_id and
-                rec.location_id.usage == 'internal' and
-                rec.operating_unit_id and
-                rec.operating_unit_id != rec.location_id.operating_unit_id
-            ):
-                raise ValidationError(
-                    _('Configuration error\n'
-                      'The Parent Stock Location '
-                      'must belong to the same Operating Unit.')
-                )
+    operating_unit_id = fields.Many2one(
+        comodel_name='operating.unit',
+        string='Operating Unit',
+        compute='_compute_operating_unit',
+        store=True,
+    )
 
 
 class StockPicking(models.Model):
     _inherit = 'stock.picking'
 
-    operating_unit_id = fields.Many2one('operating.unit',
-                                        'Requesting Operating Unit',
-                                        readonly=1)
+    operating_unit_id = fields.Many2one(
+        comodel_name='operating.unit',
+        string='Requesting Operating Unit',
+        readonly=1,
+    )
 
     @api.onchange('picking_type_id', 'partner_id')
     def onchange_picking_type(self):
@@ -139,19 +80,6 @@ class StockPicking(models.Model):
                     _('Configuration error\n'
                       'The Company in the Stock Picking '
                       'and in the Operating Unit must be the same.')
-                )
-
-    @api.multi
-    @api.constrains('operating_unit_id', 'picking_type_id')
-    def _check_picking_type_operating_unit(self):
-        for rec in self:
-            warehouse = rec.picking_type_id.warehouse_id
-            if (rec.picking_type_id and rec.operating_unit_id and
-                    warehouse.operating_unit_id != rec.operating_unit_id):
-                raise ValidationError(
-                    _('Configuration error\n'
-                      'The Operating Unit of the picking must be the same as '
-                      'that of the warehouse of the Picking Type.')
                 )
 
 
