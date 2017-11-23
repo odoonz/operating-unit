@@ -12,25 +12,23 @@ class AccountVoucher(models.Model):
 
     @api.multi
     def _get_default_operating_unit(self):
-        user = self.env['res.users'].browse(self._uid)
-        return user.default_operating_unit_id
+        return self.env.user.default_operating_unit_id
 
     operating_unit_id = fields.Many2one(
-        'operating.unit',
+        comodel_name='operating.unit',
         string='Operating Unit',
-        default=lambda self: self.env['res.users'].operating_unit_default_get(
-            self._uid),
+        default=lambda s: s._get_default_operating_unit(),
     )
 
     @api.multi
     @api.constrains('operating_unit_id')
     def _check_company_operating_unit(self):
         for rec in self:
-            if rec.company_id and rec.operating_unit_id and \
-                    rec.company_id != rec.operating_unit_id.company_id:
-                raise ValidationError(_('The Company in the voucher and in the'
-                                        'Operating Unit must be the same.'
-                                        ))
+            if rec.operating_unit_id and rec.company_id != rec.operating_unit_id.company_id:
+                raise ValidationError(_(
+                    'The Company in the voucher and in the '
+                    'Operating Unit must be the same.'
+                ))
 
     @api.multi
     def account_move_get(self):
@@ -66,7 +64,8 @@ class AccountVoucherLine(models.Model):
     _inherit = "account.voucher.line"
 
     operating_unit_id = fields.Many2one(
-        'operating.unit',
+        comodel_name='operating.unit',
         related='voucher_id.operating_unit_id',
-        string='Operating Unit', readonly=True,
+        string='Operating Unit',
+        readonly=True,
     )
