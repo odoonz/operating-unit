@@ -121,3 +121,12 @@ class StockMove(models.Model):
                       '(source or destination) that belongs to the '
                       'requesting Operating Unit.')
                 )
+
+
+class OrderPoint(models.Model):
+    _inherit = 'stock.warehouse.orderpoint'
+
+    def _get_date_planned(self, product_qty, start_date):
+        return super(OrderPoint, self.with_context(
+            operating_unit=self.warehouse_id.operating_unit_id)
+                     )._get_date_planned(product_qty, start_date)
