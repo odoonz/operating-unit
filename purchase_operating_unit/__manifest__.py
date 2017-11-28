@@ -7,7 +7,7 @@
     "name": "Operating Unit in Purchase Orders",
     "summary": "An operating unit (OU) is an organizational entity part of a "
                "company",
-    "version": "11.0.1.0.0",
+    "version": "11.0.2.0.0",
     "author": "Eficent, "
               "Serpent Consulting Services Pvt. Ltd.,"
               "Odoo Community Association (OCA)",
@@ -19,6 +19,8 @@
         "security/purchase_security.xml",
         "views/purchase_order_view.xml",
         "views/purchase_order_line_view.xml",
+        "views/product_supplierinfo_view.xml",
+        "views/res_config_settings_views.xml",
     ],
     "demo": [
         "demo/purchase_order_demo.xml",

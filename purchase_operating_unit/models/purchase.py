@@ -98,6 +98,11 @@ class PurchaseOrder(models.Model):
         picking_vals['operating_unit_id'] = self.operating_unit_id.id
         return picking_vals
 
+    @api.multi
+    def copy(self, default=None):
+        return super(PurchaseOrder, self.with_context(
+            operating_unit=self.operating_unit_id)).copy()
+
 
 class PurchaseOrderLine(models.Model):
     _inherit = 'purchase.order.line'
@@ -116,3 +121,8 @@ class PurchaseOrderLine(models.Model):
                         _('The operating unit of the purchase order must '
                           'be the same as in the associated invoices.')
                     )
+
+    @api.onchange('product_qty', 'product_uom')
+    def _onchange_quantity(self):
+        return super(PurchaseOrderLine, self.with_context(
+            operating_unit=self.operating_unit_id))._onchange_quantity()
