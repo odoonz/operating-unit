@@ -2,7 +2,7 @@
 # Copyright 2017 Open For Small Business Ltd
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl).
 
-from odoo import models
+from odoo import models, fields
 
 
 class StockMove(models.Model):
@@ -18,14 +18,22 @@ class StockMove(models.Model):
             return self.sale_line_id.operating_unit_id
         return self.operating_unit_id
 
-    def _xfer_price_get(self, product, qty):
-        return 110.0
+    def _xfer_price_get(self, product, qty, partner):
+        """Hook Method to allow custom pricing algorithms.
+        Uses pricelist set on partner"""
+        product = product.with_context(
+            partner=partner,
+            quantity=qty,
+            pricelist=partner.property_product_pricelist.id,
+            uom=product.product_uom.id)
+        return product.price * qty
 
     def _apply_intra_ou_transfer_pricing(self, xfer_value, qty, transaction_ou,
                                          inventory_ou):
         # the sale price is the inventory amount plus contribution
         # just mock for now
-        xfer_price = self._xfer_price_get(self.product_id, qty) or xfer_value
+        xfer_price = self._xfer_price_get(
+            self.product_id, qty, transaction_ou.partner_id) or xfer_value
         xfer_lines = []
         contribution_amount = xfer_price - xfer_value
         transfer_account = self.company_id.inter_ou_transfer_account_id
@@ -89,6 +97,31 @@ class StockMove(models.Model):
 
         return xfer_lines
 
+    def _create_transaction_ou_move(self, lines, transaction_ou):
+        self.ensure_one()
+        AccountMove = self.env['account.move']
+        xact_lines = []
+        other_lines = []
+        accounts_data = self.product_id.product_tmpl_id.get_product_accounts()
+        for line in lines:
+            if line[2].get('operating_unit_id', 0) == transaction_ou.id:
+                xact_lines.append(line)
+            else:
+                other_lines.append(line)
+
+        if xact_lines:
+            date = self._context.get('force_period_date', fields.Date.context_today(self))
+            new_account_move = AccountMove.create({
+                'journal_id': accounts_data['journal_id'],
+                'line_ids': xact_lines,
+                'date': date,
+                'ref': self.picking_id.name,
+                'stock_move_id': self.id,
+                'operating_unit_id': transaction_ou.id,
+            })
+            new_account_move.post()
+        return other_lines
+
     def _prepare_account_move_line(self, qty, cost, credit_account_id,
                                    debit_account_id):
         lines = super(StockMove, self)._prepare_account_move_line(
@@ -106,4 +139,6 @@ class StockMove(models.Model):
                     xfer_value += line[2]['credit']
             xfer_lines = self._apply_intra_ou_transfer_pricing(
                 xfer_value, qty, transaction_ou, inventory_ou)
-        return lines + xfer_lines
+            lines = self._create_transaction_ou_move(
+                lines + xfer_lines, transaction_ou)
+        return lines
