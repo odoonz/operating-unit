@@ -6,6 +6,7 @@ from collections import defaultdict
 from odoo.tools.translate import _
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError
+from odoo.tools import safe_eval
 
 
 class AccountMoveLine(models.Model):
@@ -30,6 +31,8 @@ class AccountMoveLine(models.Model):
     def _query_get(self, domain=None):
         if domain is None:
             domain = []
+        if not isinstance(domain, (list, tuple)):
+            domain = safe_eval(domain)
         if self._context.get('operating_unit_ids', False):
             domain.append(('operating_unit_id', 'in',
                            self._context.get('operating_unit_ids')))
