@@ -25,13 +25,11 @@ class StockMove(models.Model):
             partner=partner,
             quantity=qty,
             pricelist=partner.property_product_pricelist.id,
-            uom=product.product_uom.id)
+            uom=product.uom_id.id)
         return product.price * qty
 
     def _apply_intra_ou_transfer_pricing(self, xfer_value, qty, transaction_ou,
                                          inventory_ou):
-        # the sale price is the inventory amount plus contribution
-        # just mock for now
         xfer_price = self._xfer_price_get(
             self.product_id, qty, transaction_ou.partner_id) or xfer_value
         xfer_lines = []

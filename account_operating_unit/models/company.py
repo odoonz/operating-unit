@@ -1,7 +1,7 @@
 # © 2016-17 Eficent Business and IT Consulting Services S.L.
 # © 2016 Serpent Consulting Services Pvt. Ltd.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html).
-from odoo import fields, models
+from odoo import fields, models, api
 
 
 class ResCompany(models.Model):
@@ -13,7 +13,6 @@ class ResCompany(models.Model):
         domain=[('user_type_id.type', '=', 'payable')],
         help="This payable account maintains balances owing between "
              "Operating Units",
-        required=True,
     )
 
     inter_ou_transfer_account_id = fields.Many2one(
@@ -22,5 +21,4 @@ class ResCompany(models.Model):
         domain=[('user_type_id.type', '=', 'other')],
         help="This P&L account maintains contributions between "
              "Operating Units",
-        required=True,
     )

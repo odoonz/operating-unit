@@ -12,20 +12,21 @@ class AccountJournal(models.Model):
         comodel_name='operating.unit',
         string='Operating Unit',
         index=True,
-        help="Default Operating Unit used for payments in this journal.")
+        help="Default Operating Unit used for payments in this journal.",
+    )
 
     @api.onchange('type')
     def onchange_journal_type(self):
         if self.type not in ['bank', 'cash']:
             self.operating_unit_id = False
 
-    @api.multi
-    @api.constrains('type')
-    def _check_ou(self):
-        if self.filtered(lambda j: (
-                j.type in ('bank', 'cash') and
-                not j.operating_unit_id)):
-            raise ValidationError(_(
-                'Configuration error!\n'
-                'The operating unit must be indicated in bank journals if '
-                'it has been defined as self-balanced at company level.'))
+    # @api.multi
+    # @api.constrains('type')
+    # def _check_ou(self):
+    #     if self.filtered(lambda j: (
+    #             j.type in ('bank', 'cash') and
+    #             not j.operating_unit_id)):
+    #         raise ValidationError(_(
+    #             'Configuration error!\n'
+    #             'The operating unit must be indicated in bank journals if '
+    #             'it has been defined as self-balanced at company level.'))

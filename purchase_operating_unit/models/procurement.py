@@ -9,19 +9,6 @@ from odoo.exceptions import ValidationError
 class ProcurementRule(models.Model):
     _inherit = 'procurement.rule'
 
-    @api.multi
-    @api.constrains('purchase_line_id')
-    def _check_purchase_order_operating_unit(self):
-        for record in self:
-            purchase = record.purchase_line_id.order_id
-            location = record.location_id
-            if (purchase and
-                    purchase.operating_unit_id != location.operating_unit_id):
-                raise ValidationError(_(
-                    'Configuration error\n'
-                    'The Quotation / Purchase Order and the Procurement Order '
-                    'must belong to the same Operating Unit.')
-                    )
 
     @api.multi
     def _prepare_purchase_order(self, product_id, product_qty, product_uom,

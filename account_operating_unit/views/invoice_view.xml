@@ -47,7 +47,7 @@
             </xpath>
             <xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='account_analytic_id']"
                    position="attributes">
-                <attribute name="domain">[('company_id', '=', parent.company_id), '|', ('operating_unit_ids', 'in', [operating_unit_id]), ('operating_unit_ids', '=', False)]</attribute>
+                <attribute name="domain">[('company_id', '=', parent.company_id), '|', ('operating_unit_ids', 'in', [parent.operating_unit_id]), ('operating_unit_ids', '=', False)]</attribute>
             </xpath>
             <xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='account_analytic_id']" position="after">
                 <field name="operating_unit_id" invisible="1" />
@@ -58,7 +58,7 @@
             </xpath>
             <xpath expr="//field[@name='tax_line_ids']/tree/field[@name='account_analytic_id']"
                    position="attributes">
-                <attribute name="domain">[('company_id', '=', parent.company_id), '|', ('operating_unit_ids', 'in', [operating_unit_id]), ('operating_unit_ids', '=', False)]</attribute>
+                <attribute name="domain">[('company_id', '=', parent.company_id), '|', ('operating_unit_ids', 'in', [parent.operating_unit_id]), ('operating_unit_ids', '=', False)]</attribute>
             </xpath>
         </field>
     </record>
@@ -80,7 +80,7 @@
             </xpath>
             <xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='account_analytic_id']"
                    position="attributes">
-                <attribute name="domain">[('company_id', '=', parent.company_id), '|', ('operating_unit_ids', 'in', [operating_unit]), ('operating_unit_ids', '=', False)]</attribute>
+                <attribute name="domain">[('company_id', '=', parent.company_id), '|', ('operating_unit_ids', 'in', [parent.operating_unit_id]), ('operating_unit_ids', '=', False)]</attribute>
             </xpath>
         </field>
     </record>
