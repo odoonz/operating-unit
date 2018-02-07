@@ -9,20 +9,29 @@ class StockWarehouse(models.Model):
     _inherit = "stock.warehouse"
 
     def _default_operating_unit(self):
-        if self.company_id:
-            company = self.company_id
-        else:
-            company = self.env['res.company']._company_default_get(self._name)
-        for ou in self.env.user.operating_unit_ids:
-            if company == self.company_id:
-                self.operating_unit_id = ou
-                return
+        return
+        # if self.company_id:
+        #     company = self.company_id
+        # else:
+        #     company = self.env['res.company']._company_default_get(self._name)
+        # operating_unit = False
+        # for ou in self.env.user.operating_unit_ids:
+        #     if company == ou.company_id:
+        #         operating_unit = ou
+        #         break
+        # if not operating_unit:
+        #     name = self.name or company.name
+        #     operating_unit = self.env['operating.unit'].create(
+        #         {'name': name + ' Main Operating Unit',
+        #          'code': name.upper()[:3],
+        #          'company_id': company.id,
+        #          'partner_id': company.partner_id.id})
+        # return operating_unit.id
 
     operating_unit_id = fields.Many2one(
         comodel_name='operating.unit',
         string='Operating Unit',
         default=_default_operating_unit,
-        required=True
     )
 
     @api.multi
@@ -41,6 +50,7 @@ class StockWarehouse(models.Model):
 class StockLocation(models.Model):
     _inherit = 'stock.location'
 
+    @api.depends('location_id')
     def _compute_operating_unit(self):
         for record in self:
             record.operating_unit_id = record.get_warehouse().operating_unit_id

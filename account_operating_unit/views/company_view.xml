@@ -8,6 +8,7 @@
         <field name="arch" type="xml">
             <xpath expr="//notebook/page/group" position="after">
                 <group string="Operating Units">
+                    <field name="id" invisible="1" />
                     <field name="inter_ou_clearing_account_id" />
                     <field name="inter_ou_transfer_account_id" />
                 </group>

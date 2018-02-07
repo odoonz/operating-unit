@@ -10,7 +10,8 @@ class ResCompany(models.Model):
     inter_ou_clearing_account_id = fields.Many2one(
         comodel_name='account.account',
         string='Inter-operating unit clearing account',
-        domain=[('user_type_id.type', '=', 'payable')],
+        domain="[('user_type_id.type', '=', 'payable'),"
+               "('company_id', '=', id)]",
         help="This payable account maintains balances owing between "
              "Operating Units",
     )
@@ -18,7 +19,8 @@ class ResCompany(models.Model):
     inter_ou_transfer_account_id = fields.Many2one(
         comodel_name='account.account',
         string='Inter-operating unit transfer account',
-        domain=[('user_type_id.type', '=', 'other')],
+        domain="[('user_type_id.type', '=', 'other'),"
+               "('company_id', '=', id)]",
         help="This P&L account maintains contributions between "
              "Operating Units",
     )

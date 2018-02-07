@@ -110,7 +110,7 @@ class StockMove(models.Model):
         if xact_lines:
             date = self._context.get('force_period_date', fields.Date.context_today(self))
             new_account_move = AccountMove.create({
-                'journal_id': accounts_data['journal_id'],
+                'journal_id': accounts_data['stock_journal'].id,
                 'line_ids': xact_lines,
                 'date': date,
                 'ref': self.picking_id.name,
@@ -125,9 +125,10 @@ class StockMove(models.Model):
         lines = super(StockMove, self)._prepare_account_move_line(
             qty, cost, credit_account_id, debit_account_id)
         inventory_ou = self.operating_unit_id
+        if not inventory_ou:
+            inventory_ou = self.location_id.operating_unit_id
         transaction_ou = self._get_transaction_ou()
-        xfer_lines = []
-        if inventory_ou != transaction_ou:
+        if transaction_ou and inventory_ou != transaction_ou:
             xfer_value = 0.0
             for line in lines:
                 if line[2]['debit']:
