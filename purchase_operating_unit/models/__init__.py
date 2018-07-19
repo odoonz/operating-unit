@@ -5,5 +5,4 @@
 from . import purchase
 from . import procurement
 from . import invoice
-from . import product_supplierinfo
 from . import res_config_settings
