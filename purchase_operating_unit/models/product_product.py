@@ -4,6 +4,7 @@
 # flake8: noqa
 # as we are copying from odoo core
 from odoo import fields, models, api
+from odoo.tools import float_compare
 
 
 class ProductProduct(models.Model):
@@ -13,7 +14,8 @@ class ProductProduct(models.Model):
     def _select_seller(self, partner_id=False, quantity=0.0, date=None, uom_id=False):
         self.ensure_one()
         if date is None:
-            date = fields.Date.context_today(self)  # Note - change from naive date
+            date = fields.Date.context_today(self)
+        precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
 
         # Filter for OU Here
         sellers = self.seller_ids
@@ -36,7 +38,7 @@ class ProductProduct(models.Model):
                 continue
             if partner_id and seller.name not in [partner_id, partner_id.parent_id]:
                 continue
-            if quantity_uom_seller < seller.min_qty:
+            if float_compare(quantity_uom_seller, seller.min_qty, precision_digits=precision) == -1:
                 continue
             if seller.product_id and seller.product_id != self:
                 continue
@@ -44,3 +46,13 @@ class ProductProduct(models.Model):
             res |= seller
             break
         return res
+
+
+class SupplierInfo(models.Model):
+    _inherit = "product.supplierinfo"
+
+    operating_unit_id = fields.Many2one(
+        comodel_name='operating.unit',
+        string='Operating Unit',
+        index=True,
+    )

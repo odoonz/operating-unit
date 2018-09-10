@@ -4,5 +4,6 @@
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html).
 from . import purchase
 from . import procurement
+from . import product_product
 from . import invoice
 from . import res_config_settings

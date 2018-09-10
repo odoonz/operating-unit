@@ -31,7 +31,7 @@ class StockMove(models.Model):
     def _apply_intra_ou_transfer_pricing(self, xfer_value, qty, transaction_ou,
                                          inventory_ou):
         xfer_price = self._xfer_price_get(
-            self.product_id, qty, transaction_ou.partner_id) or xfer_value
+            self.product_id, abs(qty), transaction_ou.partner_id) or xfer_value
         xfer_lines = []
         contribution_amount = xfer_price - xfer_value
         transfer_account = self.company_id.inter_ou_transfer_account_id
