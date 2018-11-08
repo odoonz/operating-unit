@@ -23,7 +23,7 @@
                 <field name="operating_unit_id" groups="operating_unit.group_multi_operating_unit"/>
             </field>
             <filter name="group_by_partner_id" position="after">
-                <filter string="Operating Unit" icon="terp-folder-orange"
+                <filter string="Operating Unit" name="operating_unit"
                       domain="[]" groups="operating_unit.group_multi_operating_unit"
                       context="{'group_by':'operating_unit_id'}"/>
             </filter>

@@ -9,9 +9,6 @@ Accounting with Operating Units
 This module allows a company to manage the accounting based on Operating
 Units (OU's).
 
-* The financial reports (Trial Balance, P&L, Balance Sheet), allow to report
-  the balances of one or more OU's.
-
 * If a company wishes to report Balance Sheet and P&L accounts based on
   OU's, they should indicate at company level that the OU's are
   self-balanced, and the corresponding Inter-Operating Unit clearing account.

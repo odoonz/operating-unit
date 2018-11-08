@@ -3,7 +3,7 @@
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html).
 from odoo.addons.account_operating_unit.tests import\
     test_account_operating_unit as test_ou
-import time
+from odoo import fields
 
 
 class TestInvoiceOperatingUnit(test_ou.TestAccountOperatingUnit):
@@ -24,7 +24,7 @@ class TestInvoiceOperatingUnit(test_ou.TestAccountOperatingUnit):
                'active_ids': [self.invoice.id]}
         register_payments = \
             self.register_payments_model.with_context(**ctx).create({
-                'payment_date': time.strftime('%Y') + '-07-15',
+                'payment_date': fields.Date.context_today(self.invoice),
                 'journal_id': self.cash_journal_ou1.id,
                 'payment_method_id': self.payment_method_manual_in.id
             })

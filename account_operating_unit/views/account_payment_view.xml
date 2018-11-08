@@ -36,7 +36,7 @@
                 <field name="operating_unit_id" groups="operating_unit.group_multi_operating_unit"/>
             </field>
             <field name="journal_id" position="after">
-                <filter string="Operating Unit" domain="[]"
+                <filter string="Operating Unit" domain="[]" name="operating_unit"
                         context="{'group_by': 'operating_unit_id'}"
                         groups="operating_unit.group_multi_operating_unit"/>
             </field>
