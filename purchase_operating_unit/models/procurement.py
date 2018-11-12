@@ -6,14 +6,14 @@ from odoo import _, api, models
 from odoo.exceptions import ValidationError
 
 
-class ProcurementRule(models.Model):
-    _inherit = 'procurement.rule'
+class StockRule(models.Model):
+    _inherit = 'stock.rule'
 
 
     @api.multi
     def _prepare_purchase_order(self, product_id, product_qty, product_uom,
                                 origin, values, partner):
-        res = super(ProcurementRule, self)._prepare_purchase_order(
+        res = super()._prepare_purchase_order(
             product_id, product_qty, product_uom, origin, values, partner)
         operating_unit = self.location_id.operating_unit_id
         if operating_unit:
@@ -33,12 +33,11 @@ class ProcurementRule(models.Model):
 
         if self.location_id.operating_unit_id:
             suppliers = suppliers.filtered(_ou_suppliers)
-        return super(
-            ProcurementRule, self)._make_po_select_supplier(values, suppliers)
+        return super()._make_po_select_supplier(values, suppliers)
 
     def _run_buy(self, product_id, product_qty, product_uom, location_id,
                  name, origin, values):
-        return super(ProcurementRule, self.with_context(
+        return super(StockRule, self.with_context(
                 operating_unit=self.location_id.operating_unit_id))._run_buy(
                     product_id, product_qty, product_uom, location_id,
                     name, origin, values)

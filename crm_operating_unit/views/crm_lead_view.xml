@@ -38,7 +38,7 @@
                 <field name="partner_id" position="after">
                     <field name="operating_unit_id" groups="operating_unit.group_multi_operating_unit"/>
                 </field>
-                <xpath expr="//filter[@name='customer']" position="after" >
+                <xpath expr="//filter[@name='company']" position="after" >
                     <filter name="groupby_operating_unit" string="Department" domain="[]" context="{'group_by': 'operating_unit_id'}" />
                 </xpath>
             </field>

@@ -7,13 +7,13 @@
     "name": "Operating Unit in Purchase Orders",
     "summary": "An operating unit (OU) is an organizational entity part of a "
                "company",
-    "version": "11.0.2.0.0",
+    "version": "12.0.1.0.0",
     "author": "Eficent, "
               "Serpent Consulting Services Pvt. Ltd.,"
               "Odoo Community Association (OCA)",
     "website": "http://www.eficent.com",
     "category": "Purchase Management",
-    "depends": ["purchase"],
+    "depends": ["purchase", "stock_operating_unit"],
     "license": "LGPL-3",
     "data": [
         "security/purchase_security.xml",

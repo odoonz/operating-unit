@@ -6,7 +6,7 @@
     "name": "Stock with Operating Units",
     "summary": "An operating unit (OU) is an organizational entity part of a "
                "company",
-    "version": "11.0.1.0.0",
+    "version": "12.0.1.0.0",
     "category": "Generic Modules/Sales & Purchases",
     "author": "Eficent, "
               "Serpent Consulting Services Pvt. Ltd., "

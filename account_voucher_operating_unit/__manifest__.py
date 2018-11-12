@@ -6,7 +6,7 @@
 {
     'name': 'Vouchers with Operating Units',
     'summary': 'Introduces the operating unit to vouchers',
-    'version': '11.0.1.0.0',
+    'version': '12.0.1.0.0',
     'category': 'Generic Modules/Sales & Purchases',
     "author": "Eficent, "
               "Ecosoft Co. Ltd.,"

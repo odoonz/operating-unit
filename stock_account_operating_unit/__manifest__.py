@@ -6,7 +6,7 @@
     'name': 'Stock Account Operating Unit',
     'summary': """
         Adds more sophisticated stock accounting to operating units""",
-    'version': '11.0.1.0.0',
+    'version': '12.0.1.0.0',
     'license': 'LGPL-3',
     'author': 'Open For Small Business Ltd,Odoo Community Association (OCA)',
     'website': 'https://o4sb.com',
