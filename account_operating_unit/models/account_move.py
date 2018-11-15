@@ -104,7 +104,7 @@ class AccountMove(models.Model):
         return ou_balance
 
     @api.multi
-    def post(self):
+    def post(self, invoice=False):
         ml_obj = self.env['account.move.line']
         for move in self:
             # If all move lines point to the same operating unit, there's no
@@ -131,7 +131,7 @@ class AccountMove(models.Model):
                 move.with_context(skip_ou_check=False).write(
                     {'line_ids': [(4, aml.id) for aml in amls]})
 
-        return super(AccountMove, self).post()
+        return super().post(invoice=invoice)
 
     def assert_balanced(self):
         if self.env.context.get('skip_ou_check'):
