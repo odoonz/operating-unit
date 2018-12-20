@@ -50,7 +50,6 @@ class StockWarehouse(models.Model):
 class StockLocation(models.Model):
     _inherit = 'stock.location'
 
-    @api.depends('location_id')
     def _compute_operating_unit(self):
         for record in self:
             record.operating_unit_id = record.get_warehouse().operating_unit_id
@@ -59,7 +58,6 @@ class StockLocation(models.Model):
         comodel_name='operating.unit',
         string='Operating Unit',
         compute='_compute_operating_unit',
-        store=True,
     )
 
 
@@ -73,8 +71,11 @@ class StockPicking(models.Model):
     )
 
     @api.onchange('picking_type_id', 'partner_id')
-    def onchange_picking_type(self):
+    def _onchange_picking_type(self):
+        import wdb;
+        wdb.set_trace()
         res = super(StockPicking, self).onchange_picking_type()
+
         if self.picking_type_id:
             unit = self.picking_type_id.warehouse_id.operating_unit_id
             self.operating_unit_id = unit
