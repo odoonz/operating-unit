@@ -16,7 +16,7 @@ class StockMove(models.Model):
         """
         if self._is_out() and self.sale_line_id:
             return self.sale_line_id.operating_unit_id
-        return self.operating_unit_id
+        return self.operating_unit_id or self.operating_unit_dest_id
 
     def _xfer_price_get(self, product, qty, partner):
         """Hook Method to allow custom pricing algorithms.
@@ -140,4 +140,7 @@ class StockMove(models.Model):
                 xfer_value, qty, transaction_ou, inventory_ou)
             lines = self._create_transaction_ou_move(
                 lines + xfer_lines, transaction_ou)
+        else:
+            for line in lines:
+                line[2]["operating_unit_id"] = transaction_ou.id
         return lines

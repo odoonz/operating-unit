@@ -58,6 +58,7 @@ class StockLocation(models.Model):
         comodel_name='operating.unit',
         string='Operating Unit',
         compute='_compute_operating_unit',
+        store=True,
     )
 
 
@@ -72,10 +73,7 @@ class StockPicking(models.Model):
 
     @api.onchange('picking_type_id', 'partner_id')
     def _onchange_picking_type(self):
-        import wdb;
-        wdb.set_trace()
         res = super(StockPicking, self).onchange_picking_type()
-
         if self.picking_type_id:
             unit = self.picking_type_id.warehouse_id.operating_unit_id
             self.operating_unit_id = unit
