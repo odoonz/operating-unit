@@ -126,7 +126,7 @@ class StockMove(models.Model):
             qty, cost, credit_account_id, debit_account_id)
         inventory_ou = self.operating_unit_id
         if not inventory_ou:
-            inventory_ou = self.location_id.operating_unit_id
+            inventory_ou = self.location_id.operating_unit_id or self.location_dest_id.operating_unit_id
         transaction_ou = self._get_transaction_ou()
         if transaction_ou and inventory_ou != transaction_ou:
             xfer_value = 0.0
