@@ -24,5 +24,3 @@ class MRPProduction(models.Model):
                                       "operating unit")
             else:
                 record.operating_unit_id = operating_unit_id
-
-
