@@ -10,68 +10,65 @@ class StockWarehouse(models.Model):
 
     def _default_operating_unit(self):
         return
-        # if self.company_id:
-        #     company = self.company_id
-        # else:
-        #     company = self.env['res.company']._company_default_get(self._name)
-        # operating_unit = False
-        # for ou in self.env.user.operating_unit_ids:
-        #     if company == ou.company_id:
-        #         operating_unit = ou
-        #         break
-        # if not operating_unit:
-        #     name = self.name or company.name
-        #     operating_unit = self.env['operating.unit'].create(
-        #         {'name': name + ' Main Operating Unit',
-        #          'code': name.upper()[:3],
-        #          'company_id': company.id,
-        #          'partner_id': company.partner_id.id})
-        # return operating_unit.id
 
     operating_unit_id = fields.Many2one(
-        comodel_name='operating.unit',
-        string='Operating Unit',
+        comodel_name="operating.unit",
+        string="Operating Unit",
         default=_default_operating_unit,
     )
 
     @api.multi
-    @api.constrains('operating_unit_id', 'company_id')
+    @api.constrains("operating_unit_id", "company_id")
     def _check_company_operating_unit(self):
         for rec in self:
-            if (rec.operating_unit_id and
-                    rec.company_id != rec.operating_unit_id.company_id):
+            if (
+                rec.operating_unit_id
+                and rec.company_id != rec.operating_unit_id.company_id
+            ):
                 raise ValidationError(
-                    _('Configuration error\n'
-                      'The Company in the Stock Warehouse '
-                      'and in the Operating Unit must be the same.')
+                    _(
+                        "Configuration error\n"
+                        "The Company in the Stock Warehouse "
+                        "and in the Operating Unit must be the same."
+                    )
                 )
 
 
 class StockLocation(models.Model):
-    _inherit = 'stock.location'
+    _inherit = "stock.location"
 
+    @api.depends(
+        "location_id",
+        "location_id.location_id",
+        "view_location_id_inverse",
+        "location_id.view_location_id_inverse",
+        "view_location_id_inverse.operating_unit_id",
+    )
     def _compute_operating_unit(self):
         for record in self:
             record.operating_unit_id = record.get_warehouse().operating_unit_id
 
     operating_unit_id = fields.Many2one(
-        comodel_name='operating.unit',
-        string='Operating Unit',
-        compute='_compute_operating_unit',
+        comodel_name="operating.unit",
+        string="Operating Unit",
+        compute="_compute_operating_unit",
         store=True,
+        compute_sudo=True,
+    )
+
+    view_location_id_inverse = fields.One2many(
+        "stock.warehouse", "view_location_id", "Warehouse"
     )
 
 
 class StockPicking(models.Model):
-    _inherit = 'stock.picking'
+    _inherit = "stock.picking"
 
     operating_unit_id = fields.Many2one(
-        comodel_name='operating.unit',
-        string='Requesting Operating Unit',
-        readonly=1,
+        comodel_name="operating.unit", string="Requesting Operating Unit", readonly=1
     )
 
-    @api.onchange('picking_type_id', 'partner_id')
+    @api.onchange("picking_type_id", "partner_id")
     def _onchange_picking_type(self):
         res = super(StockPicking, self).onchange_picking_type()
         if self.picking_type_id:
@@ -80,62 +77,71 @@ class StockPicking(models.Model):
         return res
 
     @api.multi
-    @api.constrains('operating_unit_id', 'company_id')
+    @api.constrains("operating_unit_id", "company_id")
     def _check_company_operating_unit(self):
         for rec in self:
-            if (rec.company_id and rec.operating_unit_id and
-                    rec.company_id != rec.operating_unit_id.company_id):
+            if (
+                rec.company_id
+                and rec.operating_unit_id
+                and rec.company_id != rec.operating_unit_id.company_id
+            ):
                 raise ValidationError(
-                    _('Configuration error\n'
-                      'The Company in the Stock Picking '
-                      'and in the Operating Unit must be the same.')
+                    _(
+                        "Configuration error\n"
+                        "The Company in the Stock Picking "
+                        "and in the Operating Unit must be the same."
+                    )
                 )
 
 
 class StockMove(models.Model):
-    _inherit = 'stock.move'
+    _inherit = "stock.move"
 
     operating_unit_id = fields.Many2one(
-        related='location_id.operating_unit_id',
-        string='Source Location Operating Unit',
+        related="location_id.operating_unit_id",
+        string="Source Location Operating Unit",
         readonly=True,
     )
     operating_unit_dest_id = fields.Many2one(
-        related='location_dest_id.operating_unit_id',
-        string='Dest. Location Operating Unit',
+        related="location_dest_id.operating_unit_id",
+        string="Dest. Location Operating Unit",
         readonly=True,
     )
 
     @api.multi
-    @api.constrains('location_id', 'picking_id', 'location_dest_id')
+    @api.constrains("location_id", "picking_id", "location_dest_id")
     def _check_stock_move_operating_unit(self):
         for stock_move in self:
             if not stock_move.operating_unit_id:
                 return True
             operating_unit = stock_move.operating_unit_id
             operating_unit_dest = stock_move.operating_unit_dest_id
-            if (stock_move.location_id and
-                stock_move.location_id.operating_unit_id and
-                stock_move.picking_id and
-                operating_unit != stock_move.picking_id.operating_unit_id
-                ) and (
-                stock_move.location_dest_id and
-                stock_move.location_dest_id.operating_unit_id and
-                stock_move.picking_id and
-                operating_unit_dest != stock_move.picking_id.operating_unit_id
+            if (
+                stock_move.location_id
+                and stock_move.location_id.operating_unit_id
+                and stock_move.picking_id
+                and operating_unit != stock_move.picking_id.operating_unit_id
+            ) and (
+                stock_move.location_dest_id
+                and stock_move.location_dest_id.operating_unit_id
+                and stock_move.picking_id
+                and operating_unit_dest != stock_move.picking_id.operating_unit_id
             ):
                 raise ValidationError(
-                    _('Configuration error\n'
-                      'The Stock moves must be related to a location '
-                      '(source or destination) that belongs to the '
-                      'requesting Operating Unit.')
+                    _(
+                        "Configuration error\n"
+                        "The Stock moves must be related to a location "
+                        "(source or destination) that belongs to the "
+                        "requesting Operating Unit."
+                    )
                 )
 
 
 class OrderPoint(models.Model):
-    _inherit = 'stock.warehouse.orderpoint'
+    _inherit = "stock.warehouse.orderpoint"
 
     def _get_date_planned(self, product_qty, start_date):
-        return super(OrderPoint, self.with_context(
-            operating_unit=self.warehouse_id.operating_unit_id)
-                     )._get_date_planned(product_qty, start_date)
+        return super(
+            OrderPoint,
+            self.with_context(operating_unit=self.warehouse_id.operating_unit_id),
+        )._get_date_planned(product_qty, start_date)
