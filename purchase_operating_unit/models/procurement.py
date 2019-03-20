@@ -5,7 +5,6 @@
 from odoo import _, api, models
 from odoo.exceptions import ValidationError
 
-
 class StockRule(models.Model):
     _inherit = 'stock.rule'
 
@@ -16,6 +15,8 @@ class StockRule(models.Model):
         res = super()._prepare_purchase_order(
             product_id, product_qty, product_uom, origin, values, partner)
         operating_unit = self.location_id.operating_unit_id
+        if not operating_unit and 'sale_line_id' in values:
+            operating_unit = self.env['sale.order.line'].browse(values['sale_line_id']).order_id.operating_unit_id
         if operating_unit:
             res.update({
                 'operating_unit_id': operating_unit.id,

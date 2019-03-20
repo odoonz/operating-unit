@@ -16,7 +16,7 @@ class StockMove(models.Model):
         """
         if self._is_out() and self.sale_line_id:
             return self.sale_line_id.operating_unit_id
-        return self.operating_unit_id or self.operating_unit_dest_id
+        return self.operating_unit_id or self.operating_unit_dest_id or self.sale_line_id.operating_unit_id
 
     def _xfer_price_get(self, product, qty, partner):
         """Hook Method to allow custom pricing algorithms.
@@ -124,9 +124,8 @@ class StockMove(models.Model):
                                    debit_account_id):
         lines = super(StockMove, self)._prepare_account_move_line(
             qty, cost, credit_account_id, debit_account_id)
-        inventory_ou = self.operating_unit_id
-        if not inventory_ou:
-            inventory_ou = self.location_id.operating_unit_id or self.location_dest_id.operating_unit_id
+        inventory_ou = self.operating_unit_id or self.location_id.operating_unit_id or self.location_dest_id.operating_unit_id or self.sale_line_id.operating_unit_id
+
         transaction_ou = self._get_transaction_ou()
         if transaction_ou and inventory_ou != transaction_ou:
             xfer_value = 0.0
