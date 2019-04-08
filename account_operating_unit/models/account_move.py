@@ -112,6 +112,11 @@ class AccountMoveLine(models.Model):
                         "must be the same."
                     )
                 )
+            
+    def _create_writeoff(self, writeoff_vals):
+        for vals in writeoff_vals:
+            vals["operating_unit_id"] = self.env.context.get("default_operating_unit")
+        return super()._create_writeoff(writeoff_vals)
 
 
 class AccountMove(models.Model):
@@ -215,3 +220,33 @@ class AccountMove(models.Model):
                             "self-balanced at company level."
                         )
                     )
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if not vals.get("operating_unit_id"):
+                vals['operating_unit_id'] = self.env.context.get('default_operating_unit')
+        return super().create(vals_list)
+
+class AccountReconciliation(models.AbstractModel):
+    _inherit = 'account.reconciliation.widget'
+
+    @api.model
+    def _process_move_lines(self, move_line_ids, new_mv_line_dicts):
+        """ Create new move lines from new_mv_line_dicts (if not empty) then call reconcile_partial on self and new move lines
+
+            :param new_mv_line_dicts: list of dicts containing values suitable for account_move_line.create()
+        """
+        account_move_lines = self.env['account.move.line'].browse(move_line_ids)
+        operating_unit_ids = account_move_lines.mapped('operating_unit_id').ids
+        if len(set(operating_unit_ids)) == 1 and operating_unit_ids[0]:
+            default_operating_unit = operating_unit_ids[0]
+        elif self.env.user.default_operating_unit_id.company_id == self.company_id:
+            default_operating_unit = self.env.user.default_operating_unit_id.id
+        else:
+            operating_units = self.env['operating.unit'].search([('company_id', '=', self.company_id.id)])
+            default_operating_unit = operating_units.id if len(operating_units) == 1 else False
+        return super(
+            AccountReconciliation,
+            self.with_context(default_operating_unit=default_operating_unit),
+        )._process_move_lines(move_line_ids, new_mv_line_dicts)
