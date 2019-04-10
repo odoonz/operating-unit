@@ -25,7 +25,8 @@ class AccountInvoice(models.Model):
                            self).finalize_invoice_move_lines(move_lines)
         if self.operating_unit_id:
             for line_tuple in move_lines:
-                line_tuple[2]['operating_unit_id'] = self.operating_unit_id.id
+                if not line_tuple[2].get('operating_unit_id'):
+                    line_tuple[2]['operating_unit_id'] = self.operating_unit_id.id
         return move_lines
 
     @api.multi
@@ -38,13 +39,29 @@ class AccountInvoice(models.Model):
                                     'Operating Unit must be the same.'))
         return True
 
+    @api.model
+    def invoice_line_move_line_get(self):
+        res = super().invoice_line_move_line_get()
+        inv_line_ou = {l.id: l.operating_unit_id.id for l in self.invoice_line_ids}
+        for line in res:
+            line['operating_unit_id'] = inv_line_ou.get(line['invl_id'], self.operating_unit_id.id)
+        return res
+
 
 class AccountInvoiceLine(models.Model):
     _inherit = 'account.invoice.line'
 
     operating_unit_id = fields.Many2one(
         comodel_name='operating.unit',
-        related='invoice_id.operating_unit_id',
+        default=lambda s: s.env.context.get('operating_unit') or s.invoice_id.operating_unit_id,
         string='Operating Unit',
-        readonly=True,
     )
+
+class ProductProduct(models.Model):
+    _inherit = 'product.product'
+
+    @api.model
+    def _convert_prepared_anglosaxon_line(self, line, partner):
+        res = super()._convert_prepared_anglosaxon_line(line, partner)
+        res.update({'operating_unit_id': line.get('operating_unit_id')})
+        return res

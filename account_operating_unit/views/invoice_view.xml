@@ -50,7 +50,7 @@
                 <attribute name="domain">[('company_id', '=', parent.company_id), '|', ('operating_unit_ids', 'in', [parent.operating_unit_id]), ('operating_unit_ids', '=', False)]</attribute>
             </xpath>
             <xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='account_analytic_id']" position="after">
-                <field name="operating_unit_id" invisible="1" />
+                <field name="operating_unit_id" options="{'no_create': True, 'no_open': True}" domain="[('company_id', '=', parent.company_id)]"/>
             </xpath>
             <xpath  expr="//field[@name='tax_line_ids']"
                     position="attributes">
@@ -59,6 +59,18 @@
             <xpath expr="//field[@name='tax_line_ids']/tree/field[@name='account_analytic_id']"
                    position="attributes">
                 <attribute name="domain">[('company_id', '=', parent.company_id), '|', ('operating_unit_ids', 'in', [parent.operating_unit_id]), ('operating_unit_ids', '=', False)]</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_invoice_line_form" model="ir.ui.view">
+        <field name="name">account.invoice.line.form</field>
+        <field name="model">account.invoice.line</field>
+        <field name="inherit_id" ref="account.view_invoice_line_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='account_analytic_id']"
+                   position="before">
+                <field name="operating_unit_id" options="{'no_create': True, 'no_open': True}" groups="operating_unit.group_multi_operating_unit" domain="[('company_id', '=', parent.company_id)]" />
             </xpath>
         </field>
     </record>
