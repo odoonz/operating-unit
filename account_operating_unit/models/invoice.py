@@ -46,6 +46,12 @@ class AccountInvoice(models.Model):
         for line in res:
             line['operating_unit_id'] = inv_line_ou.get(line['invl_id'], self.operating_unit_id.id)
         return res
+    
+    def action_invoice_open(self):
+        for line in self.invoice_line_ids:
+            if not line.operating_unit_id:
+                line.operating_unit_id = self.operating_unit_id
+        return super(AccountInvoice, self.with_context(default_operating_unit=self.operating_unit_id.id)).action_invoice_open()
 
 
 class AccountInvoiceLine(models.Model):

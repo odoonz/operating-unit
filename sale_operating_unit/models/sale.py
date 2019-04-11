@@ -77,3 +77,9 @@ class SaleOrderLine(models.Model):
         related='order_id.operating_unit_id',
         string='Operating Unit',
         readonly=True)
+
+    @api.multi
+    def _prepare_invoice_line(self, qty):
+        res = super()._prepare_invoice_line(qty)
+        res["operating_unit_id"] = self.order_id.operating_unit_id.id
+        return res
