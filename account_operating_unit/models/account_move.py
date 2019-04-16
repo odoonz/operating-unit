@@ -38,8 +38,8 @@ class AccountBankStatementLine(models.Model):
             new_aml_dicts=new_aml_dicts,
         )
 
-    def _prepare_reconciliation_move(self, move_ref):
-        data = super()._prepare_reconciliation_move(move_ref)
+    def _prepare_reconciliation_move_line(self, move, amount):
+        data = super()._prepare_reconciliation_move_line(move, amount)
         data['operating_unit_id'] = self.env.context.get('default_operating_unit')
         return data
 
@@ -223,9 +223,9 @@ class AccountMove(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        for vals in vals_list:
-            if not vals.get("operating_unit_id"):
-                vals['operating_unit_id'] = self.env.context.get('default_operating_unit')
+        # for vals in vals_list:
+        #     if not vals.get("operating_unit_id"):
+        #         vals['operating_unit_id'] = self.env.context.get('default_operating_unit')
         return super().create(vals_list)
 
 class AccountReconciliation(models.AbstractModel):
@@ -245,8 +245,8 @@ class AccountReconciliation(models.AbstractModel):
             default_operating_unit = self.env.user.default_operating_unit_id.id
         else:
             operating_units = self.env['operating.unit'].search([('company_id', '=', self.company_id.id)])
-            default_operating_unit = operating_units.id if len(operating_units) == 1 else False
+            default_operating_unit = operating_units.ids[-1:]
         return super(
             AccountReconciliation,
-            self.with_context(default_operating_unit=default_operating_unit),
+            self.with_context(default_operating_unit=default_operating_unit, clear_ou=True),
         )._process_move_lines(move_line_ids, new_mv_line_dicts)
