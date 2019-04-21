@@ -2,12 +2,24 @@
 # Copyright 2017 Open For Small Business Ltd
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl).
 
-from odoo import models, fields
+from odoo import models, fields, api
+from odoo.osv import expression
 
 
 class StockMove(models.Model):
 
     _inherit = 'stock.move'
+
+    @api.model
+    def _get_in_base_domain(self, company_id=False):
+        domain = super()._get_in_base_domain(company_id=company_id)
+        if self.env.context.get('operating_unit_id'):
+            domain = expression.AND([[('operating_unit_id', '=', self.env.context.get('operating_unit_id'))], domain])
+        return domain
+
+    @api.model
+    def _run_fifo(self, move, quantity=None):
+        return super(StockMove, self.with_context(operating_unit_id=move._get_transaction_ou().id))._run_fifo(quantity=quantity)
 
     def _get_transaction_ou(self):
         """
