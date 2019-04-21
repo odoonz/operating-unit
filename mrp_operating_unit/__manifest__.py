@@ -15,7 +15,8 @@
         "stock_operating_unit",
     ],
     "data": [
-        'views/mrp_production.xml'
+        'security/mrp_security.xml',
+        'views/mrp_production.xml',
     ],
     'installable': True,
 }
