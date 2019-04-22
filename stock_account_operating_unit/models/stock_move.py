@@ -19,7 +19,7 @@ class StockMove(models.Model):
 
     @api.model
     def _run_fifo(self, move, quantity=None):
-        return super(StockMove, self.with_context(operating_unit_id=move._get_transaction_ou().id))._run_fifo(quantity=quantity)
+        return super(StockMove, self.with_context(operating_unit_id=move._get_transaction_ou().id))._run_fifo(move, quantity=quantity)
 
     def _get_transaction_ou(self):
         """
