@@ -48,10 +48,16 @@ class AccountInvoice(models.Model):
         return res
     
     def action_invoice_open(self):
-        for line in self.invoice_line_ids:
-            if not line.operating_unit_id:
-                line.operating_unit_id = self.operating_unit_id
-        return super(AccountInvoice, self.with_context(default_operating_unit=self.operating_unit_id.id)).action_invoice_open()
+        seen_ou = set()
+        for inv in self:
+            seen_ou.add(inv.operating_unit_id.id)
+            for line in inv.invoice_line_ids:
+                if not line.operating_unit_id:
+                    line.operating_unit_id = inv.operating_unit_id
+        ctx = {}
+        if len(seen_ou) == 1:
+            ctx.update(default_operating_unit=seen_ou.pop())
+        return super(AccountInvoice, self.with_context(**ctx)).action_invoice_open()
 
 
 class AccountInvoiceLine(models.Model):
