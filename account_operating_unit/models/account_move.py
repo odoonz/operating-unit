@@ -24,11 +24,15 @@ class AccountBankStatementLine(models.Model):
             ou_split[k] = sum(v)
         if len(ou_split.keys()) == 1:
             default_operating_unit = list(ou_split.keys())[0]
+        elif self.journal_id.operating_unit_id:
+            default_operating_unit = self.journal_id.operating_unit_id.id
         elif self.env.user.default_operating_unit_id.company_id == self.company_id:
             default_operating_unit = self.env.user.default_operating_unit_id.id
         else:
             operating_units = self.env['operating.unit'].search([('company_id', '=', self.company_id.id)])
-            default_operating_unit = operating_units.id if len(operating_units) == 1 else False
+            default_operating_unit = operating_units[0].id if operating_units else False
+        for new_aml in new_aml_dicts:
+            new_aml['operating_unit_id'] = new_aml.get('operating_unit_id', default_operating_unit)
         return super(
             AccountBankStatementLine,
             self.with_context(ou_split=ou_split,default_operating_unit=default_operating_unit),
