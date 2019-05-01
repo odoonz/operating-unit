@@ -16,10 +16,17 @@ class AccountBankStatementLine(models.Model):
         self, counterpart_aml_dicts=None, payment_aml_rec=None, new_aml_dicts=None
     ):
         ou_split = defaultdict(list)
+        analytic_account_obj = self.env['account.analytic.account']
         for aml_dict in counterpart_aml_dicts:
             ou_id = aml_dict["move_line"].operating_unit_id.id
             aml_dict["operating_unit_id"] = ou_id
             ou_split[ou_id].append(aml_dict["debit"] - aml_dict["credit"])
+        for new_aml in new_aml_dicts:
+            ou = analytic_account_obj.browse(new_aml.get('analytic_account_id')).switch_to_operating_unit
+            if ou:
+                new_aml['analytic_account_id'] = False
+                new_aml['operating_unit_id'] = ou.id
+                ou_split[ou.id].append(new_aml["debit"] - new_aml["credit"])
         for k ,v in ou_split.items():
             ou_split[k] = sum(v)
         if len(ou_split.keys()) == 1:

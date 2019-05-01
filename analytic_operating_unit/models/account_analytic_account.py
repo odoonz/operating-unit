@@ -13,3 +13,8 @@ class AccountAnalyticAccount(models.Model):
         relation='analytic_account_operating_unit_rel',
         column1='analytic_account_id',
         column2='operating_unit_id')
+
+    # Technical field as too hard to put operating unit in reconciliation widget
+    switch_to_operating_unit = fields.Many2one(
+        comodel_name='operating.unit'
+    )
