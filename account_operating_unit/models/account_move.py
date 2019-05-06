@@ -234,9 +234,10 @@ class AccountMove(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        # for vals in vals_list:
-        #     if not vals.get("operating_unit_id"):
-        #         vals['operating_unit_id'] = self.env.context.get('default_operating_unit')
+        for vals in vals_list:
+            for l in vals.get('line_ids', []):
+                if not l[2].get("operating_unit_id"):
+                    l[2]['operating_unit_id'] = self.env.context.get('default_operating_unit')
         return super().create(vals_list)
 
 class AccountReconciliation(models.AbstractModel):
@@ -257,6 +258,8 @@ class AccountReconciliation(models.AbstractModel):
         else:
             operating_units = self.env['operating.unit'].search([('company_id', '=', self.company_id.id)])
             default_operating_unit = operating_units.ids[-1:]
+        for new_mv_line in new_mv_line_dicts:
+            new_mv_line['operating_unit_id'] = new_mv_line.get('operating_unit_id', default_operating_unit)
         return super(
             AccountReconciliation,
             self.with_context(default_operating_unit=default_operating_unit, clear_ou=True),

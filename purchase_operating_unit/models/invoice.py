@@ -8,6 +8,11 @@ from odoo import api, models
 class AccountInvoice(models.Model):
     _inherit = 'account.invoice'
 
+    def _prepare_invoice_line_from_po_line(self, line):
+        data = super()._prepare_invoice_line_from_po_line(line)
+        data['operating_unit_id'] = line.order_id.operating_unit_id.id
+        return data
+
     # Load all unsold PO lines
     @api.onchange('purchase_id')
     def purchase_order_change(self):
