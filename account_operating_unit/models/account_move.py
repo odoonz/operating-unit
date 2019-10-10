@@ -16,18 +16,20 @@ class AccountBankStatementLine(models.Model):
         self, counterpart_aml_dicts=None, payment_aml_rec=None, new_aml_dicts=None
     ):
         ou_split = defaultdict(list)
-        analytic_account_obj = self.env['account.analytic.account']
+        analytic_account_obj = self.env["account.analytic.account"]
         for aml_dict in counterpart_aml_dicts:
             ou_id = aml_dict["move_line"].operating_unit_id.id
             aml_dict["operating_unit_id"] = ou_id
             ou_split[ou_id].append(aml_dict["debit"] - aml_dict["credit"])
         for new_aml in new_aml_dicts:
-            ou = analytic_account_obj.browse(new_aml.get('analytic_account_id')).switch_to_operating_unit
+            ou = analytic_account_obj.browse(
+                new_aml.get("analytic_account_id")
+            ).switch_to_operating_unit
             if ou:
-                new_aml['analytic_account_id'] = False
-                new_aml['operating_unit_id'] = ou.id
+                new_aml["analytic_account_id"] = False
+                new_aml["operating_unit_id"] = ou.id
                 ou_split[ou.id].append(new_aml["debit"] - new_aml["credit"])
-        for k ,v in ou_split.items():
+        for k, v in ou_split.items():
             ou_split[k] = sum(v)
         if len(ou_split.keys()) == 1:
             default_operating_unit = list(ou_split.keys())[0]
@@ -36,13 +38,19 @@ class AccountBankStatementLine(models.Model):
         elif self.env.user.default_operating_unit_id.company_id == self.company_id:
             default_operating_unit = self.env.user.default_operating_unit_id.id
         else:
-            operating_units = self.env['operating.unit'].search([('company_id', '=', self.company_id.id)])
+            operating_units = self.env["operating.unit"].search(
+                [("company_id", "=", self.company_id.id)]
+            )
             default_operating_unit = operating_units[0].id if operating_units else False
         for new_aml in new_aml_dicts:
-            new_aml['operating_unit_id'] = new_aml.get('operating_unit_id', default_operating_unit)
+            new_aml["operating_unit_id"] = new_aml.get(
+                "operating_unit_id", default_operating_unit
+            )
         return super(
             AccountBankStatementLine,
-            self.with_context(ou_split=ou_split,default_operating_unit=default_operating_unit),
+            self.with_context(
+                ou_split=ou_split, default_operating_unit=default_operating_unit
+            ),
         ).process_reconciliation(
             counterpart_aml_dicts=counterpart_aml_dicts,
             payment_aml_rec=payment_aml_rec,
@@ -51,7 +59,7 @@ class AccountBankStatementLine(models.Model):
 
     def _prepare_reconciliation_move_line(self, move, amount):
         data = super()._prepare_reconciliation_move_line(move, amount)
-        data['operating_unit_id'] = self.env.context.get('default_operating_unit')
+        data["operating_unit_id"] = self.env.context.get("default_operating_unit")
         return data
 
 
@@ -102,8 +110,10 @@ class AccountMoveLine(models.Model):
                     _(
                         "Configuration error!\n"
                         "The Company in the move line and "
-                        "Operating Unit must be the same."
+                        "Operating Unit must be the same. "
+                        "Got: %s %s %s %s"
                     )
+                    % (rec.ref, rec.name, rec.operating_unit.name, rec.company_id.name)
                 )
 
     @api.multi
@@ -123,7 +133,7 @@ class AccountMoveLine(models.Model):
                         "must be the same."
                     )
                 )
-            
+
     def _create_writeoff(self, writeoff_vals):
         for vals in writeoff_vals:
             vals["operating_unit_id"] = self.env.context.get("default_operating_unit")
@@ -235,13 +245,16 @@ class AccountMove(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
-            for l in vals.get('line_ids', []):
+            for l in vals.get("line_ids", []):
                 if not l[2].get("operating_unit_id"):
-                    l[2]['operating_unit_id'] = self.env.context.get('default_operating_unit')
+                    l[2]["operating_unit_id"] = self.env.context.get(
+                        "default_operating_unit"
+                    )
         return super().create(vals_list)
 
+
 class AccountReconciliation(models.AbstractModel):
-    _inherit = 'account.reconciliation.widget'
+    _inherit = "account.reconciliation.widget"
 
     @api.model
     def _process_move_lines(self, move_line_ids, new_mv_line_dicts):
@@ -249,18 +262,34 @@ class AccountReconciliation(models.AbstractModel):
 
             :param new_mv_line_dicts: list of dicts containing values suitable for account_move_line.create()
         """
-        account_move_lines = self.env['account.move.line'].browse(move_line_ids)
-        operating_unit_ids = account_move_lines.mapped('operating_unit_id').ids
+        account_move_lines = self.env["account.move.line"].browse(move_line_ids)
+        operating_unit_ids = account_move_lines.mapped("operating_unit_id").ids
         if len(set(operating_unit_ids)) == 1 and operating_unit_ids[0]:
             default_operating_unit = operating_unit_ids[0]
-        elif self.env.user.default_operating_unit_id.company_id == account_move_lines[0].company_id:
+        elif (
+            self.env.user.default_operating_unit_id.company_id
+            == account_move_lines[0].company_id
+        ):
             default_operating_unit = self.env.user.default_operating_unit_id.id
         else:
-            operating_units = self.env['operating.unit'].search([('company_id', '=', account_move_lines[0].company_id.id or self.env.user.company_id.id)])
+            operating_units = self.env["operating.unit"].search(
+                [
+                    (
+                        "company_id",
+                        "=",
+                        account_move_lines[0].company_id.id
+                        or self.env.user.company_id.id,
+                    )
+                ]
+            )
             default_operating_unit = operating_units.ids[-1:]
         for new_mv_line in new_mv_line_dicts:
-            new_mv_line['operating_unit_id'] = new_mv_line.get('operating_unit_id', default_operating_unit)
+            new_mv_line["operating_unit_id"] = new_mv_line.get(
+                "operating_unit_id", default_operating_unit
+            )
         return super(
             AccountReconciliation,
-            self.with_context(default_operating_unit=default_operating_unit, clear_ou=True),
+            self.with_context(
+                default_operating_unit=default_operating_unit, clear_ou=True
+            ),
         )._process_move_lines(move_line_ids, new_mv_line_dicts)
