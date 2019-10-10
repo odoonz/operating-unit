@@ -113,7 +113,7 @@ class AccountMoveLine(models.Model):
                         "Operating Unit must be the same. "
                         "Got: %s %s %s %s"
                     )
-                    % (rec.ref, rec.name, rec.operating_unit.name, rec.company_id.name)
+                    % (rec.ref, rec.name, rec.operating_unit_id.name, rec.company_id.name)
                 )
 
     @api.multi

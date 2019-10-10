@@ -19,6 +19,7 @@ class StockMove(models.Model):
 
     @api.model
     def _run_fifo(self, move, quantity=None):
+        move = move.with_context(force_valuation_ou=move._check_interbranch_transfer())
         return super(StockMove, self.with_context(operating_unit_id=move._get_transaction_ou().id))._run_fifo(move, quantity=quantity)
 
     def _get_transaction_ou(self):
@@ -155,3 +156,30 @@ class StockMove(models.Model):
             for line in lines:
                 line[2]["operating_unit_id"] = transaction_ou.id
         return lines
+
+    def _check_interbranch_transfer(self):
+        for move_line in self.move_line_ids.filtered(lambda ml: not ml.owner_id):
+            if move_line.location_id.operating_unit_id and move_line.location_dest_id.operating_unit_id and move_line.location_id.operating_unit_id != move_line.location_dest_id.operating_unit_id:
+                return move_line.location_id.operating_unit_id.id
+        return False
+
+    def _is_out(self):
+        """ Check if the move should be considered as entering the company so that the cost method
+        will be able to apply the correct logic.
+
+        :return: True if the move is entering the company else False
+        """
+        return super()._is_out() or bool(self._check_interbranch_transfer())
+
+    def _run_valuation(self, quantity=None):
+        self = self.with_context(force_valuation_ou=self._check_interbranch_transfer())
+        return super()._run_valuation(quantity=quantity)
+
+
+class StockLocation(models.Model):
+    _inherit = 'stock.location'
+
+    def _should_be_valued(self):
+        if self._context.get('force_valuation_ou'):
+            return self.operating_unit_id.id == self._context['force_valuation_ou']
+        return super()._should_be_valued()
