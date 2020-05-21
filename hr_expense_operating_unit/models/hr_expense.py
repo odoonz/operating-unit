@@ -4,6 +4,7 @@
 
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
+from odoo.tools import email_split
 
 
 class HrExpenseExpense(models.Model):
@@ -75,6 +76,38 @@ class HrExpenseExpense(models.Model):
             res[expense.id][0].update({"operating_unit_id": self.operating_unit_id.id})
             res[expense.id][1].update({"operating_unit_id": self.operating_unit_id.id})
         return res
+
+    @api.model
+    def message_new(self, msg_dict, custom_values=None):
+        """
+        Temporary workaround to expenses selecting wrong company.
+        Remove when resolved upstream
+        :param msg_dict:
+        :param custom_values:
+        :return:
+        """
+        email_address = email_split(msg_dict.get("email_from", False))[0]
+        employee = self.env["hr.employee"].sudo.search(
+            [
+                "|",
+                ("work_email", "ilike", email_address),
+                ("user_id.email", "ilike", email_address),
+            ],
+            limit=1,
+        )
+        if not employee:
+            raise ValidationError(
+                _("Expenses must come from an employee registered as HR Employee")
+            )
+        company = employee.company_id
+        if hasattr(company, "intercompany_user_id"):
+            uid = company.intercompany_user_id.id
+        else:
+            uid = self._uid
+        new_self = self.sudo(uid).with_context(force_company=company.id)
+        return super(HrExpenseExpense, new_self).message_new(
+            msg_dict, custom_values=custom_values
+        )
 
 
 class HrExpenseSheet(models.Model):
