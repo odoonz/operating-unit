@@ -87,7 +87,7 @@ class HrExpenseExpense(models.Model):
         :return:
         """
         email_address = email_split(msg_dict.get("email_from", False))[0]
-        employee = self.env["hr.employee"].sudo.search(
+        employee = self.env["hr.employee"].sudo().search(
             [
                 "|",
                 ("work_email", "ilike", email_address),
