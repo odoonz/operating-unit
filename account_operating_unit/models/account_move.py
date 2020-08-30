@@ -264,7 +264,7 @@ class AccountReconciliation(models.AbstractModel):
         """
         account_move_lines = self.env["account.move.line"].browse(move_line_ids)
         operating_unit_ids = account_move_lines.mapped("operating_unit_id").ids
-        if len(set(operating_unit_ids)) == 1 and operating_unit_ids[0]:
+        if len(set(operating_unit_ids)) == 1:
             default_operating_unit = operating_unit_ids[0]
         elif (
             self.env.user.default_operating_unit_id.company_id
@@ -282,7 +282,7 @@ class AccountReconciliation(models.AbstractModel):
                     )
                 ]
             )
-            default_operating_unit = operating_units.ids[-1:]
+            default_operating_unit = operating_units.ids[0]
         for new_mv_line in new_mv_line_dicts:
             new_mv_line["operating_unit_id"] = new_mv_line.get(
                 "operating_unit_id", default_operating_unit
